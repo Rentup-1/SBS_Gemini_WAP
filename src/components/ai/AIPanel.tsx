@@ -1,0 +1,114 @@
+import React from 'react';
+import { type InventoryForm } from '../../interfaces';
+
+interface AIPanelProps {
+  whatsappInput: string;
+  setWhatsappInput: (input: string) => void;
+  aiResponseRaw: string;
+  loading: boolean;
+  message: string;
+  phoneStatus: 'Inventory' | 'Request';
+  setPhoneStatus: (status: 'Inventory' | 'Request') => void;
+  customerName: string;
+  customerId: string;
+  form: InventoryForm;
+  onGenerate: () => void;
+  onConfirm: () => void;
+}
+
+export const AIPanel: React.FC<AIPanelProps> = ({
+  whatsappInput,
+  setWhatsappInput,
+  aiResponseRaw,
+  loading,
+  message,
+  phoneStatus,
+  setPhoneStatus,
+  customerName,
+  customerId,
+  form,
+  onGenerate,
+  onConfirm
+}) => {
+  return (
+    <div className="bg-white p-6 rounded-xl shadow-lg h-full flex flex-col">
+      <h1 className="text-xl font-bold text-gray-900 mb-4">Parsing WhatsApp Message</h1>
+
+      <div className="bg-gray-50 p-4 rounded-lg mb-4 grid grid-cols-2 gap-4 text-sm">
+        <p>WAP Message Type: <span className="font-semibold text-blue-600">{phoneStatus}</span></p>
+        <p>Telephone Number: <span className="font-semibold">+201006531212</span></p>
+        <p>Username: <span className="font-semibold">Yahya Negm</span></p>
+        <p>Customer ID: <span className="font-semibold">12541</span></p>
+        <p className="col-span-2">Customer Status: <span className="font-semibold">{customerName} ({customerId})</span></p>
+
+        <button
+          onClick={() => setPhoneStatus(phoneStatus === 'Inventory' ? 'Request' : 'Inventory')}
+          className="col-span-2 bg-yellow-200 text-yellow-800 py-1 rounded-md text-xs font-semibold hover:bg-yellow-300 transition"
+        >
+          Toggle Message Type: {phoneStatus}
+        </button>
+      </div>
+
+      <div className="flex-shrink-0 mb-4 border p-4 rounded-lg">
+        <div className="flex justify-between items-center mb-2">
+          <label className="text-sm font-semibold text-gray-700">WAP Message</label>
+          <div className="text-xs text-gray-500 text-right">
+            <span className="block">Timestamp: <span className="font-semibold">{form.timestamp}</span></span>
+            <span className="block text-gray-700">
+              Incoming: <span className="font-semibold">+2010054542313</span>
+              <span className="text-xs ml-1 font-normal text-gray-500">({phoneStatus})</span>
+            </span>
+          </div>
+        </div>
+        <textarea
+          rows={4}
+          value={whatsappInput}
+          onChange={(e) => setWhatsappInput(e.target.value)}
+          placeholder="Paste the raw WhatsApp inventory message here..."
+          className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition resize-y"
+          disabled={loading}
+        ></textarea>
+        <button
+          onClick={onGenerate}
+          disabled={loading || !whatsappInput.trim()}
+          className="mt-3 w-full bg-blue-600 text-white py-2 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          {loading ? 'Generating...' : 'Generate Data'}
+        </button>
+        <div className="mt-3 p-2 bg-white rounded-md border border-dashed">
+          <p className="font-semibold text-xs text-gray-700 mb-1">Image/Media URLs ({form.image_urls.length}):</p>
+          {form.image_urls.length > 0 ? (
+            <ul className="space-y-1 text-blue-600 text-xs">
+              {form.image_urls.map((url, index) => (
+                <li key={index} className="truncate hover:underline cursor-pointer" title={url}>{url}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500 italic text-xs">No media URLs attached. (AI will try to extract them)</p>
+          )}
+        </div>
+      </div>
+
+      <div className="flex-grow flex flex-col">
+        <label className="text-sm font-semibold text-gray-700 mb-2 block">AI Response: Structured JSON Output</label>
+        <textarea
+          rows={10}
+          readOnly
+          value={aiResponseRaw || 'Structured JSON output will appear here after generation.'}
+          className="flex-grow w-full p-3 border border-gray-300 rounded-md bg-gray-50 font-mono text-xs overflow-auto"
+        ></textarea>
+        <button
+          onClick={onConfirm}
+          disabled={!aiResponseRaw || loading}
+          className="mt-4 w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold shadow-md hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          Confirm & Fill Form
+        </button>
+      </div>
+
+      <div className={`mt-4 p-3 rounded-lg text-sm font-medium ${message.startsWith('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+        {message || 'App ready. Paste message and click Generate Data.'}
+      </div>
+    </div>
+  );
+};

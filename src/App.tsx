@@ -1,14 +1,13 @@
-import { Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
+import { Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import Layout from "./components/layout/Layout";
 
 export default function App() {
   return (
-    <div className="min-h-screen">
-      <main className="p-4">
-        <Routes>
-          <Route path="/" element={<Home />} />
-        </Routes>
-      </main>
-    </div>
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Home />} />
+      </Route>
+    </Routes>
   );
 }
