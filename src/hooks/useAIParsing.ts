@@ -41,7 +41,7 @@ export const useAIParsing = (setForm: (form: InventoryForm) => void, setWhatsapp
     }
     try {
       const parsedData = JSON.parse(aiResponseRaw);
-
+      console.log(parsedData)
       const newFormState: InventoryForm = {
         ...initialFormState,
         type: parsedData.type || initialFormState.type,
@@ -54,8 +54,8 @@ export const useAIParsing = (setForm: (form: InventoryForm) => void, setWhatsapp
         duration_type: parsedData.duration_type || initialFormState.duration_type,
         start_date: parsedData.start_date || initialFormState.start_date,
         end_date: parsedData.end_date || initialFormState.end_date,
-        bedrooms: parsedData.bedrooms !== undefined ? parsedData.bedrooms : initialFormState.bedrooms,
-        bathrooms: parsedData.bathrooms !== undefined ? parsedData.bathrooms : initialFormState.bathrooms,
+        bedrooms: parsedData.no_bedroom !== undefined ? parsedData.no_bedroom : initialFormState.bedrooms,
+        bathrooms: parsedData.no_bathroom !== undefined ? parsedData.no_bathroom : initialFormState.bathrooms,
         location: parsedData.location || initialFormState.location,
         listed_by: parsedData.listed_by || initialFormState.listed_by,
         tag: parsedData.tag || initialFormState.tag,

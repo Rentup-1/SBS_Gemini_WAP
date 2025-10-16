@@ -1,3 +1,5 @@
+// All interfaces used in the application
+
 export interface DropdownOptions {
   types?: string[];
   propertyTypes?: string[];
@@ -92,4 +94,119 @@ export interface SearchableInputProps {
   name: string;
   options: string[];
   placeholder?: string;
+}
+
+export interface Message {
+  id: number;
+  contactName: string;
+  contactPhone: string;
+  message: string;
+  sentAt: string;
+  isRead: boolean;
+  source: 'WAP' | 'Website';
+  type: 'Inventory' | 'Request';
+  userType: 'New' | 'Existing';
+  userId: string;
+  replied: 'Yes' | 'No';
+  status: 'Not Listed' | 'Listed';
+}
+
+export type FlexibleColumnKey = 
+  | 'id' | 'contactName' | 'message' | 'sentAt' 
+  | 'source' | 'type' | 'userType' | 'userId' | 'replied' | 'status';
+
+export type ColumnKey = FlexibleColumnKey | 'checkbox' | 'actions';
+
+export type SortColumn = FlexibleColumnKey;
+export type SortDirection = 'asc' | 'desc';
+export type ColumnFilters = Record<FlexibleColumnKey, string>;
+
+export interface ColumnDef {
+  label: string;
+  isSortable: boolean;
+  isFilterable: boolean;
+  icon?: React.ElementType;
+}
+
+export interface ApiResponse<T> {
+  status: boolean;
+  message: string;
+  data: T;
+}
+
+export interface PaginationMeta {
+  current_page: number;
+  total_pages: number;
+  total_count: number;
+  per_page: number;
+}
+
+export interface User {
+  id: number;
+  name: string;
+  email: string | null;
+  phone: string;
+  username: string | null;
+  provider: string | null;
+  provider_id: string | null;
+  photo: string | null;
+  is_corporate: number;
+  address: string | null;
+  nationality: string | null;
+  gender: string;
+  verified: number;
+  email_verified_at: string | null;
+  two_factor_secret: string | null;
+  two_factor_recovery_codes: string | null;
+  two_factor_confirmed_at: string | null;
+  is_admin: boolean;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  whatsapp: string | null;
+  corporate_id: number | null;
+  manager_id: number | null;
+  fcm_token: string | null;
+}
+
+export interface ApiMessage {
+  id: number;
+  phone: string;
+  username: string;
+  type: string;
+  message: string;
+  media_type: string;
+  media_urls: string[];
+  sent_at: string | null;
+  created_at: string;
+  user: User;
+}
+
+// Map API message to our local Message type
+export interface Message {
+  id: number;
+  contactName: string;
+  contactPhone: string;
+  message: string;
+  sentAt: string;
+  isRead: boolean;
+  source: 'WAP' | 'Website';
+  type: 'Inventory' | 'Request';
+  userType: 'New' | 'Existing';
+  userId: string;
+  replied: 'Yes' | 'No';
+  status: 'Not Listed' | 'Listed';
+  mediaUrls?: string[];
+  mediaType?: string;
+}
+
+export interface MessagesResponse {
+  messages: Message[];
+  meta: PaginationMeta;
+}
+
+export interface ApiError {
+  message: string;
+  status: number;
+  code?: string;
 }

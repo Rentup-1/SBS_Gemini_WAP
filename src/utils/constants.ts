@@ -1,4 +1,5 @@
-import type { InventoryForm, RequestForm } from "../interfaces";
+import type { Message } from "postcss";
+import type { ColumnDef, ColumnKey, FlexibleColumnKey, InventoryForm, RequestForm } from "../interfaces";
 
 export const API_URL_BASE = `https://sbsapi.rentup.com.eg/api/gemini/extract`;
 export const MAX_RETRIES = 5;
@@ -63,3 +64,96 @@ export const initialRequestFormState: RequestForm = {
   client_user: '', assigned_agent: 'None', owner: 'None',
   tag: 'Standard', is_urgent: false,
 };
+
+export const COLUMN_METADATA: Record<ColumnKey, ColumnDef> = {
+  checkbox: { label: '', isSortable: false, isFilterable: false },
+  id: { label: 'ID', isSortable: true, isFilterable: true },
+  contactName: { label: 'CONTACT', isSortable: true, isFilterable: true},
+  message: { label: 'MESSAGE', isSortable: true, isFilterable: true},
+  sentAt: { label: 'SENT AT', isSortable: true, isFilterable: true},
+  source: { label: 'SOURCE', isSortable: true, isFilterable: true},
+  type: { label: 'TYPE', isSortable: true, isFilterable: true },
+  userType: { label: 'USER', isSortable: true, isFilterable: true},
+  userId: { label: 'USER ID', isSortable: true, isFilterable: true },
+  replied: { label: 'REPLIED', isSortable: true, isFilterable: true },
+  status: { label: 'STATUS', isSortable: true, isFilterable: true },
+  actions: { label: 'ACTIONS', isSortable: false, isFilterable: false },
+};
+
+export const INITIAL_FLEXIBLE_ORDER: FlexibleColumnKey[] = [
+  'id', 'contactName', 'message', 'sentAt', 
+  'status', 'source', 'type', 'userType', 'userId', 'replied'
+];
+
+export const initialMessages: Message[] = [
+  {
+    id: 1004,
+    contactName: 'Yahya Negm',
+    contactPhone: '+201006531212',
+    message: 'i want to buy an apt in el patio new cairo bgt 25k egp',
+    sentAt: 'Oct 15, 2025 18:10 PM',
+    isRead: false,
+    source: 'Website',
+    type: 'Request',
+    userType: 'Existing',
+    userId: 'u400',
+    replied: 'No',
+    status: 'Not Listed',
+  },
+  {
+    id: 1003,
+    contactName: 'Yahya Negm',
+    contactPhone: '+201006531212',
+    message: '.',
+    sentAt: 'Oct 15, 2025 18:01 PM',
+    isRead: true,
+    source: 'WAP',
+    type: 'Request',
+    userType: 'Existing',
+    userId: 'u400',
+    replied: 'Yes',
+    status: 'Listed',
+  },
+  {
+    id: 1002,
+    contactName: 'Test User',
+    contactPhone: '+1234567890',
+    message: 'Test message for error trace',
+    sentAt: 'Oct 11, 2025 08:50 AM',
+    isRead: true,
+    source: 'Website',
+    type: 'Inventory',
+    userType: 'New',
+    userId: 'u305',
+    replied: 'Yes',
+    status: 'Listed',
+  },
+  {
+    id: 1001,
+    contactName: 'Jane Doe',
+    contactPhone: '+9876543210',
+    message: 'Checking in on the project status.',
+    sentAt: 'Oct 10, 2025 10:00 AM',
+    isRead: false,
+    source: 'WAP',
+    type: 'Inventory',
+    userType: 'New',
+    userId: 'u112',
+    replied: 'No',
+    status: 'Not Listed',
+  },
+  {
+    id: 1000,
+    contactName: 'Support Team',
+    contactPhone: '+1928374650',
+    message: 'Your ticket has been updated.',
+    sentAt: 'Oct 9, 2025 04:20 PM',
+    isRead: true,
+    source: 'Website',
+    type: 'Request',
+    userType: 'Existing',
+    userId: 'u007',
+    replied: 'Yes',
+    status: 'Listed',
+  },
+];
