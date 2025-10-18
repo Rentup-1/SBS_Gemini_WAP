@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
+import GemeniExtraction from "./pages/GemeniExtraction";
 import Layout from "./components/layout/Layout";
 import { MessageList } from './components/messages';
 
@@ -8,7 +8,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<MessageList />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/extraction" element={<GemeniExtraction />} />
       </Route>
     </Routes>
   );

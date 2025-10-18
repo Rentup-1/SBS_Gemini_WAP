@@ -10,8 +10,8 @@ import type {
 import { COLUMN_METADATA } from "../../utils/constants";
 import { SortableHeader } from "./SortableHeader";
 import { FilterInput } from "./FilterInput";
-import { Pen, Trash2, Loader, Image } from "lucide-react";
-
+import { Trash2, Loader, Image, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 interface MessageTableProps {
   messages: Message[];
   selectedIds: number[];
@@ -51,15 +51,14 @@ export const MessageTable: React.FC<MessageTableProps> = ({
   onSort,
   onFilterChange,
   onSelectAll,
-  onSelectOne,
   onRowClick,
   onDeleteMessage,
   onDragStart,
   onDragEnter,
   onDrop,
 }) => {
-  const fullRenderOrder: ColumnKey[] = ["checkbox", ...columnOrder, "actions"];
-
+  const fullRenderOrder: ColumnKey[] = [...columnOrder, "actions"];
+  const navigate = useNavigate()
   if (loading && messages.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-xl p-8 flex justify-center items-center">
@@ -97,7 +96,7 @@ export const MessageTable: React.FC<MessageTableProps> = ({
             {fullRenderOrder.map((key) => {
               const metadata = COLUMN_METADATA[key];
 
-              if (key === "checkbox") {
+              if ((key as string) === "checkbox") {
                 return (
                   <th
                     key={key}
@@ -186,7 +185,7 @@ export const MessageTable: React.FC<MessageTableProps> = ({
               return (
                 <tr
                   key={msg.id}
-                  className={`border-b border-gray-100 transition-all cursor-pointer 
+                  className={`border-b border-gray-100 transition-all
                     ${
                       msg.isRead ? "text-gray-500" : "text-gray-800 font-medium"
                     } 
@@ -195,26 +194,13 @@ export const MessageTable: React.FC<MessageTableProps> = ({
                         ? "bg-blue-50 border-blue-300"
                         : "hover:bg-blue-50/70"
                     }
-                    ${loading ? "opacity-60 pointer-events-none" : ""}`}
-                  onClick={() => !loading && onRowClick(msg.id)}
+                    ${loading ? "opacity-60" : ""}`}
+                  onClick={() => onRowClick(msg.id)}
                 >
                   {fullRenderOrder.map((key) => {
                     const cellClasses = "p-4 text-sm whitespace-nowrap";
 
                     switch (key) {
-                      case "checkbox":
-                        return (
-                          <td key={key} className="p-4 text-center">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => onSelectOne(msg.id)}
-                              onClick={(e) => e.stopPropagation()}
-                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-                              disabled={loading}
-                            />
-                          </td>
-                        );
                       case "id":
                         return (
                           <td
@@ -259,36 +245,36 @@ export const MessageTable: React.FC<MessageTableProps> = ({
                             {msg.sentAt}
                           </td>
                         );
-                      case "status":
-                        return (
-                          <td
-                            key={key}
-                            className={`${cellClasses} text-center`}
-                          >
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                                msg.status === "Listed"
-                                  ? "bg-indigo-100 text-indigo-800"
-                                  : "bg-yellow-100 text-yellow-800"
-                              }`}
-                            >
-                              {msg.status}
-                            </span>
-                          </td>
-                        );
-                      case "source":
-                        return (
-                          <td key={key} className={cellClasses}>
-                            {msg.source}
-                          </td>
-                        );
+                      // case "status":
+                      //   return (
+                      //     <td
+                      //       key={key}
+                      //       className={`${cellClasses} text-center`}
+                      //     >
+                      //       <span
+                      //         className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                      //           msg.status === "Listed"
+                      //             ? "bg-indigo-100 text-indigo-800"
+                      //             : "bg-yellow-100 text-yellow-800"
+                      //         }`}
+                      //       >
+                      //         {msg.status}
+                      //       </span>
+                      //     </td>
+                      //   );
+                      // case "source":
+                      //   return (
+                      //     <td key={key} className={cellClasses}>
+                      //       {msg.source}
+                      //     </td>
+                      //   );
                       case "type":
                         return (
                           <td key={key} className={cellClasses}>
                             {msg.type}
                           </td>
                         );
-                      case "userType":
+                      // case "userType":
                         return (
                           <td key={key} className={cellClasses}>
                             {msg.userType}
@@ -300,7 +286,7 @@ export const MessageTable: React.FC<MessageTableProps> = ({
                             {msg.userId}
                           </td>
                         );
-                      case "replied":
+                      // case "replied":
                         return (
                           <td
                             key={key}
@@ -322,15 +308,19 @@ export const MessageTable: React.FC<MessageTableProps> = ({
                           <td key={key} className={`${cellClasses}`}>
                             <div className="flex space-x-3 justify-end items-center text-gray-400">
                               <button
-                                title="Edit"
-                                className="hover:text-yellow-600 transition p-1 rounded-full hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  console.log(`Editing message ${msg.id}`);
+                                title="Gemini"
+                                className="hover:text-blue-600 cursor-pointer transition p-1 rounded-full hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={() => {
+                                  navigate('/extraction', {
+                                    state: {
+                                      id: msg.id,
+                                      type: msg.type
+                                    }
+                                  })
                                 }}
                                 disabled={loading}
                               >
-                                <Pen className="w-4 h-4" />
+                                <Sparkles className="w-4 h-4" />
                               </button>
                               <button
                                 title="Delete"

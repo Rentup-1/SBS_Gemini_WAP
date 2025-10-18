@@ -1,14 +1,13 @@
-// All interfaces used in the application
 
 export interface DropdownOptions {
   types?: string[];
-  propertyTypes?: string[];
+  propertyTypes?: PropertyType[];
   furnishTypes?: string[];
   currencies?: string[];
   durationTypes?: string[];
-  tags?: string[];
+  tags?: TagGroup[];
   dealTypes?: string[];
-  listedByUsers?: string[];
+  listedByUsers?: User[];
   locations?: string[];
   clientNames?: string[];
   forRentTransactionTypes?: string[];
@@ -20,8 +19,8 @@ export interface DropdownOptions {
 }
 
 export interface InventoryForm {
-  type: string;
-  property_type: string;
+  type: "For Sale" | "For Rent";
+  property_type?: PropertyType;
   furnish_type: string;
   price: number;
   currency: string;
@@ -32,10 +31,11 @@ export interface InventoryForm {
   end_date: string;
   bedrooms: number;
   bathrooms: number;
-  location: string;
-  listed_by: string;
-  tag: string;
+  location?: Location;
+  listed_by?: User;
+  tag?: Tag;
   deal_type: string;
+  reference_id: string;
   whatsapp_message: string;
   is_urgent: boolean;
   timestamp: string;
@@ -46,7 +46,7 @@ export interface InventoryForm {
 }
 
 export interface RequestForm {
-  type: string;
+  type:  "Buy" | "Rent";
   status: string;
   privacy: string;
   price: number;
@@ -60,14 +60,16 @@ export interface RequestForm {
   bathrooms: number;
   furnish_type: string;
   deal_type: string;
-  location: string;
-  property_types_required: string[];
+  reference_id: string;
+  locations?: Location[];
+  property_types_required?: PropertyType[];
   options_required: string[];
-  client_user: string;
+  client_user?: User;
   assigned_agent: string;
   owner: string;
-  tag: string;
+  tag?: Tag;
   is_urgent: boolean;
+  whatsapp_message: string;
 }
 
 export interface InputFieldProps {
@@ -81,10 +83,10 @@ export interface InputFieldProps {
 
 export interface SelectFieldProps {
   label: string;
-  value: string;
+  value: string | Tag | PropertyType;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   name: string;
-  options: string[];
+  options: string[] | Tag[] | PropertyType[];
 }
 
 export interface SearchableInputProps {
@@ -92,7 +94,7 @@ export interface SearchableInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
   name: string;
-  options: string[];
+  options: string[] | User[];
   placeholder?: string;
 }
 
@@ -112,10 +114,9 @@ export interface Message {
 }
 
 export type FlexibleColumnKey = 
-  | 'id' | 'contactName' | 'message' | 'sentAt' 
-  | 'source' | 'type' | 'userType' | 'userId' | 'replied' | 'status';
+   'id' | 'contactName' | 'message' | 'sentAt' | 'type' | 'userId' ;
 
-export type ColumnKey = FlexibleColumnKey | 'checkbox' | 'actions';
+export type ColumnKey = FlexibleColumnKey | 'actions';
 
 export type SortColumn = FlexibleColumnKey;
 export type SortDirection = 'asc' | 'desc';
@@ -144,29 +145,29 @@ export interface PaginationMeta {
 export interface User {
   id: number;
   name: string;
-  email: string | null;
-  phone: string;
-  username: string | null;
-  provider: string | null;
-  provider_id: string | null;
-  photo: string | null;
-  is_corporate: number;
-  address: string | null;
-  nationality: string | null;
-  gender: string;
-  verified: number;
-  email_verified_at: string | null;
-  two_factor_secret: string | null;
-  two_factor_recovery_codes: string | null;
-  two_factor_confirmed_at: string | null;
-  is_admin: boolean;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
-  whatsapp: string | null;
-  corporate_id: number | null;
-  manager_id: number | null;
-  fcm_token: string | null;
+  email?: string | null;
+  phone?: string;
+  username?: string | null;
+  provider?: string | null;
+  provider_id?: string | null;
+  photo?: string | null;
+  is_corporate?: number;
+  address?: string | null;
+  nationality?: string | null;
+  gender?: string;
+  verified?: number;
+  email_verified_at?: string | null;
+  two_factor_secret?: string | null;
+  two_factor_recovery_codes?: string | null;
+  two_factor_confirmed_at?: string | null;
+  is_admin?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string | null;
+  whatsapp?: string | null;
+  corporate_id?: number | null;
+  manager_id?: number | null;
+  fcm_token?: string | null;
 }
 
 export interface ApiMessage {
@@ -209,4 +210,37 @@ export interface ApiError {
   message: string;
   status: number;
   code?: string;
+}
+export interface Location {
+  id: number;
+  name: string;
+}
+export interface PropertyType {
+  id: number;
+  name: string;
+  icon: string;
+}
+
+export interface Tag {
+  id: number;
+  name: string;
+  type: { value: string; display: string };
+  icon: string;
+}
+
+export interface TagGroup {
+  name: "Rent" | "Buy" | "Sell";
+  tags: Tag[];
+}
+
+export interface FurnishType {
+  id: number;
+  name: string;
+}
+
+export interface LocationState {
+  state: {
+    id: string;
+    type: "Inventory" | "Request";
+  }
 }

@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { type InventoryForm, type RequestForm, type DropdownOptions } from '../interfaces';
+import type { InventoryForm, RequestForm, DropdownOptions, Location, PropertyType, Tag, User } from '../interfaces';
 import { initialFormState, initialRequestFormState } from '../utils/constants';
 
 export const useFormHandlers = (dropdownOptions: DropdownOptions) => {
@@ -7,10 +7,10 @@ export const useFormHandlers = (dropdownOptions: DropdownOptions) => {
   const [requestForm, setRequestForm] = useState<RequestForm>(initialRequestFormState);
 
   const inventoryTransactionOptions = useMemo(() => {
-    if (form.type === 'For rent') {
+    if (form.type === 'For Rent') {
       return dropdownOptions.forRentTransactionTypes || [];
     }
-    if (form.type === 'For sale') {
+    if (form.type === 'For Sale') {
       return dropdownOptions.forSaleTransactionTypes || [];
     }
     return [];
@@ -20,7 +20,7 @@ export const useFormHandlers = (dropdownOptions: DropdownOptions) => {
     if (requestForm.type === 'Rent') {
       return dropdownOptions.forRentTransactionTypes || [];
     }
-    if (requestForm.type === 'Sale') {
+    if (requestForm.type === 'Buy') {
       return dropdownOptions.forSaleTransactionTypes || [];
     }
     return [];
@@ -31,13 +31,16 @@ export const useFormHandlers = (dropdownOptions: DropdownOptions) => {
     const checked = (e.target as HTMLInputElement).checked;
 
     if (name === 'type') {
-      const defaultTransaction = value === 'For rent' ? 'Monthly' :
-                                 value === 'For sale' ? 'Cash' :
-                                 '';
+      const properType = value === 'For Rent' ? 'For Rent' :
+        value === 'For Sale' ? 'For Sale' :
+          'For Sale';
+      const defaultTransaction = value === 'For Rent' ? 'Monthly' :
+        value === 'For Sale' ? 'Cash' :
+          '';
 
       setForm(prev => ({
         ...prev,
-        [name]: value,
+        [name]: properType,
         transaction: defaultTransaction
       }));
       return;
@@ -54,13 +57,16 @@ export const useFormHandlers = (dropdownOptions: DropdownOptions) => {
     const checked = (e.target as HTMLInputElement).checked;
 
     if (name === 'type') {
+      const typedType = value === 'Rent' ? 'Rent' :
+        value === 'Buy' ? 'Buy' :
+          'Rent';
       const defaultTransaction = value === 'Rent' ? 'Monthly' :
-                                 value === 'Sale' ? 'Cash' :
-                                 '';
+        value === 'Buy' ? 'Cash' :
+          '';
 
       setRequestForm(prev => ({
         ...prev,
-        [name]: value,
+        type: typedType,
         transaction: defaultTransaction
       }));
       return;
@@ -81,9 +87,9 @@ export const useFormHandlers = (dropdownOptions: DropdownOptions) => {
         setRequestForm(prev => {
           const currentList = prev[listName];
           if (checked) {
-            return { ...prev, [listName]: [...currentList, optionValue] };
+            return { ...prev, [listName]: [...(currentList || []), optionValue] };
           } else {
-            return { ...prev, [listName]: currentList.filter(item => item !== optionValue) };
+            return { ...prev, [listName]: (currentList || []).filter(item => item !== optionValue) };
           }
         });
       }
@@ -96,14 +102,40 @@ export const useFormHandlers = (dropdownOptions: DropdownOptions) => {
     }));
   }, []);
 
-  return {
-    form,
-    setForm,
-    requestForm,
-    setRequestForm,
-    inventoryTransactionOptions,
-    requestTransactionOptions,
-    handleInventoryInputChange,
-    handleRequestInputChange
-  };
+  const handleLocationChange = useCallback((locations: Location[]) => {
+    setRequestForm(prev => ({
+      ...prev,
+      locations: locations
+    }));
+  }, []);
+
+  // New handler for multi-select fields (returns array of IDs directly)
+  const handleMultiSelectChange = useCallback((name: string, value: string[]) => {
+    setRequestForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  }, []);
+
+  const handleObjectChanges = useCallback((object: Tag | PropertyType | User, fieldName: string) => {
+    console.log(object)
+    setForm((prev) => ({
+      ...prev,
+      [fieldName]: object,
+    }));
+  }, []);
+
+return {
+  form,
+  setForm,
+  requestForm,
+  setRequestForm,
+  inventoryTransactionOptions,
+  requestTransactionOptions,
+  handleInventoryInputChange,
+  handleRequestInputChange,
+  handleLocationChange,
+  handleMultiSelectChange,
+  handleObjectChanges
+};
 };

@@ -10,7 +10,7 @@ export const generateAiResonse = async (
     format: "json",
   };
 
-  const response = await retryFetch(API_URL_BASE, {
+  const response = await retryFetch(`${API_URL_BASE}/gemini/extract`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

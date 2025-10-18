@@ -1,3 +1,5 @@
 export { InputField } from './InputField';
 export { SelectField } from './SelectField';
 export { SearchableInput } from './SearchableInput';
+export { LocationSearch } from './LocationSearch';
+export { MultiSelectField } from './MultiSelectField'

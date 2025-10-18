@@ -20,10 +20,16 @@ export const FilterInput: React.FC<FilterInputProps> = ({
     <input
       type="text"
       placeholder={placeholder}
-      value={value}
-      onChange={(e) => onChange(columnKey, e.target.value)}
+      defaultValue={value}
+      onBlur={(e) => onChange(columnKey, e.target.value)}
       onClick={(e) => e.stopPropagation()}
-      onKeyDown={(e) => e.key === 'Enter' && e.stopPropagation()}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.stopPropagation();
+          onChange(columnKey, e.currentTarget.value);
+          e.currentTarget.blur(); // Optional: remove focus after Enter
+        }
+      }}
       className="w-full text-xs pl-7 pr-1 py-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition"
     />
   </div>

@@ -9,7 +9,7 @@ import type {
     PaginationMeta
 } from '../interfaces';
 import { INITIAL_FLEXIBLE_ORDER } from '../utils/constants';
-import { fetchMessages, deleteMessage, deleteMessagesBulk, updateMessage } from '../services/messageApi';
+import { fetchMessages } from '../services/messageApi';
 
 interface UseMessageListReturn {
     messages: Message[];
@@ -28,9 +28,6 @@ interface UseMessageListReturn {
     handleSort: (column: SortColumn) => void;
     handleSelectAll: () => void;
     handleSelectOne: (id: number) => void;
-    handleBulkDelete: () => Promise<void>;
-    handleDeleteMessage: (id: number) => Promise<void>;
-    handleUpdateMessage: (id: number, updates: Partial<Message>) => Promise<Message>;
     handleRowClick: (id: number) => void;
     handleCreateMessage: () => void;
     handleDragStart: (e: React.DragEvent<HTMLTableHeaderCellElement>, key: ColumnKey) => void;
@@ -45,7 +42,7 @@ export const useMessageList = (): UseMessageListReturn => {
     const [columnOrder, setColumnOrder] = useState<FlexibleColumnKey[]>(INITIAL_FLEXIBLE_ORDER);
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({
         id: '', contactName: '', message: '', sentAt: '',
-        source: '', type: '', userType: '', userId: '', replied: '', status: '',
+         type: '',  userId: ''
     });
     const [sortConfig, setSortConfig] = useState<{ column: SortColumn; direction: SortDirection }>({
         column: 'sentAt',
@@ -105,15 +102,12 @@ export const useMessageList = (): UseMessageListReturn => {
             }
             if (!filterValue(msg.message, filters.message)) return false;
             if (!filterValue(msg.sentAt, filters.sentAt)) return false;
-            if (!filterValue(msg.source, filters.source)) return false;
+            // if (!filterValue(msg.source, filters.source)) return false;
             if (!filterValue(msg.type, filters.type)) return false;
-            if (!filterValue(msg.userType, filters.userType)) return false;
-            // Handle userId which can now be null
-            if (filters.userId && (msg.userId === null || !String(msg.userId).toLowerCase().includes(filters.userId.toLowerCase()))) {
-                return false;
-            }
-            if (!filterValue(msg.replied, filters.replied)) return false;
-            if (!filterValue(msg.status, filters.status)) return false;
+            // if (!filterValue(msg.userType, filters.userType)) return false;
+            if (!filterValue(msg.userId, filters.userId)) return false;
+            // if (!filterValue(msg.replied, filters.replied)) return false;
+            // if (!filterValue(msg.status, filters.status)) return false;
 
             return true;
         });
@@ -142,7 +136,7 @@ export const useMessageList = (): UseMessageListReturn => {
 
     // Drag and Drop Handlers
     const handleDragStart = useCallback((e: React.DragEvent<HTMLTableHeaderCellElement>, key: ColumnKey) => {
-        if (key === 'checkbox' || key === 'actions') {
+        if ((key as string) === 'checkbox' || key === 'actions') {
             e.preventDefault();
             return;
         }
@@ -152,7 +146,7 @@ export const useMessageList = (): UseMessageListReturn => {
     }, []);
 
     const handleDragEnter = useCallback((key: ColumnKey) => {
-        if (key === 'checkbox' || key === 'actions' || dragItem.current === key) return;
+        if ((key as string) === 'checkbox' || key === 'actions' || dragItem.current === key) return;
         dragOverItem.current = key as FlexibleColumnKey;
     }, []);
 
@@ -215,63 +209,6 @@ export const useMessageList = (): UseMessageListReturn => {
         }
     }, [selectedIds, allFilteredIds]);
 
-    const handleBulkDelete = useCallback(async () => {
-        if (selectedIds.length === 0) return;
-
-        setLoading(true);
-        try {
-            await deleteMessagesBulk(selectedIds);
-            // Remove deleted messages from local state
-            setMessages(prev => prev.filter(msg => !selectedIds.includes(msg.id)));
-            setSelectedIds([]);
-            console.log(`Successfully deleted ${selectedIds.length} messages.`);
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Failed to delete messages';
-            setError(errorMessage);
-            console.error('Error deleting messages:', err);
-        } finally {
-            setLoading(false);
-        }
-    }, [selectedIds]);
-
-    const handleDeleteMessage = useCallback(async (id: number) => {
-        setLoading(true);
-        try {
-            await deleteMessage(id);
-            // Remove deleted message from local state
-            setMessages(prev => prev.filter(msg => msg.id !== id));
-            // Remove from selected IDs if it was selected
-            setSelectedIds(prev => prev.filter(selectedId => selectedId !== id));
-            console.log(`Message ${id} deleted successfully`);
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Failed to delete message';
-            setError(errorMessage);
-            console.error('Error deleting message:', err);
-            throw err; // Re-throw to handle in component
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    const handleUpdateMessage = useCallback(async (id: number, updates: Partial<Message>) => {
-        setLoading(true);
-        try {
-            const updatedMessage = await updateMessage(id, updates);
-            // Update message in local state
-            setMessages(prev =>
-                prev.map(msg => msg.id === id ? updatedMessage : msg)
-            );
-            console.log(`Message ${id} updated successfully`);
-            return updatedMessage;
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Failed to update message';
-            setError(errorMessage);
-            console.error('Error updating message:', err);
-            throw err; // Re-throw to handle in component
-        } finally {
-            setLoading(false);
-        }
-    }, []);
 
     const handleRowClick = useCallback((id: number) => {
         console.log(`Navigating to message detail for ID: ${id}.`);
@@ -304,9 +241,6 @@ export const useMessageList = (): UseMessageListReturn => {
         handleSort,
         handleSelectAll,
         handleSelectOne,
-        handleBulkDelete,
-        handleDeleteMessage,
-        handleUpdateMessage,
         handleRowClick,
         handleCreateMessage,
         handleDragStart,
