@@ -67,7 +67,7 @@ export interface RequestForm {
   client_user?: User;
   assigned_agent: string;
   owner: string;
-  tag?: Tag;
+  tag?: Tag[];
   is_urgent: boolean;
   whatsapp_message: string;
 }

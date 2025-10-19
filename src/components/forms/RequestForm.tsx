@@ -185,7 +185,7 @@ export const RequestForm: React.FC<RequestFormProps> = ({
         <MultiSelectField
           label="Property Types"
           name="property_types_required"
-          value={form.property_types_required} // Array of selected property type IDs
+          value={form.property_types_required}
           onChange={handleMultiSelectChange}
           options={dropdownOptions.propertyTypes || []}
           placeholder="Select property types..."
@@ -214,30 +214,16 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           options={dropdownOptions.listedByUsers || []}
           placeholder="Search or enter user name/ID"
         />
-        <SelectField
-          label="Assigned Agent"
-          name="assigned_agent"
-          value={form.assigned_agent}
-          onChange={onChange}
-          options={dropdownOptions.assignmentUsers || []}
-        />
-        <SelectField
-          label="Owner"
-          name="owner"
-          value={form.owner}
-          onChange={onChange}
-          options={dropdownOptions.assignmentUsers || []}
-        />
-        <SelectField
+        
+        <MultiSelectField
           label="Tag"
           name="tag"
-          value={form.tag}
-          onChange={onChange}
-          options={
-            dropdownOptions.tags
+          value={form.tag} 
+          onChange={handleMultiSelectChange}
+          options={dropdownOptions.tags
               ?.filter((category) => category.name === form.type)
-              ?.flatMap((category) => category.tags) || [] // Pass Tag objects
-          }
+              ?.flatMap((category) => category.tags) || []}
+          placeholder="Select Tags..."
         />
       </div>
 

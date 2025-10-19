@@ -30,13 +30,11 @@ export default function GemeniExtraction() {
     handleRequestInputChange,
     handleLocationChange,
     handleMultiSelectChange,
-    handleObjectChanges
+    handleObjectChanges,
   } = useFormHandlers(dropdownOptions);
 
   const [whatsappInput, setWhatsappInput] = useState("");
-  const [savedData, ] = useState<
-    Array<InventoryForm | RequestForm>
-  >([]);
+  const [savedData] = useState<Array<InventoryForm | RequestForm>>([]);
   const [loading, setLoading] = useState(false);
   const location: LocationState = useLocation();
 
@@ -71,90 +69,93 @@ export default function GemeniExtraction() {
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   }
-  const handleSaveData = useCallback(() => {
-    setLoading(true);
-    setMessage(`Saving ${phoneStatus.toLowerCase()} listing...`);
 
-    // const dataToSave = phoneStatus === "Inventory" ? form : requestForm;
-    let submissionData = null;
-    if (phoneStatus === "Inventory") {
-      submissionData = {
-        type: form.type === "For Rent" ? "for_rent" : "sell",
-        deal_type: form.deal_type,
-        property_type_id: form?.property_type?.id,
-        location_id: form.location?.id,
-        no_bedroom: form.bedrooms,
-        no_bathroom: form.bathrooms,
-        agent_assigned_id: form.listed_by?.id,
-        urgent: 0,
-        privacy: "public",
-        tag_id: form.tag?.id,
-        furnish_type_id: dropdownOptions.furnishTypes?.indexOf(form.furnish_type) ?? -1,
+  const handleSaveData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setMessage(`Saving ${phoneStatus.toLowerCase()} listing...`);
+
+      const isInventory = phoneStatus === "Inventory";
+      const data = isInventory ? form : requestForm;
+
+      const submissionData = {
+        type: isInventory
+          ? data.type === "For Rent"
+            ? "for_rent"
+            : "sell"
+          : data.type === "Rent"
+          ? "rent"
+          : "buy",
+        deal_type: data.deal_type,
+        property_type_id: isInventory
+          ? (data as InventoryForm).property_type?.id
+          : (data as RequestForm).property_types_required,
+        location_id: isInventory
+          ? (data as InventoryForm).location?.id
+          : (data as RequestForm).locations?.map((loc) => loc.id),
+        no_bedroom: data.bedrooms,
+        no_bathroom: data.bathrooms,
+        user_id: isInventory
+          ? (data as InventoryForm).listed_by?.id
+          : (data as RequestForm).client_user?.id,
+        agent_assigned_id: isInventory
+          ? (data as InventoryForm).listed_by?.id
+          : (data as RequestForm).client_user?.id,
+        urgent: data.is_urgent,
+        privacy: isInventory ? "public" : (data as RequestForm).privacy,
+        tag_id: (data as InventoryForm).tag?.id ?? (data as RequestForm).tag,
+        furnish_type_id:
+          dropdownOptions.furnishTypes?.indexOf(data.furnish_type) ?? -1,
         budget: {
-          transaction: form.transaction?.toLowerCase(),
-          price: form.price,
-          currency: form.currency,
-          ...(form.type === "For Rent"
+          transaction: data.transaction?.toLowerCase(),
+          price: data.price,
+          currency: data.currency,
+          ...(data.type === "For Rent" || data.type === "Rent"
             ? {
                 duration: {
-                  period: form.duration,
-                  type: form.duration_type,
-                  start_date: formatDateToDDMMYYYY(form.start_date.toString()),
-                  end_date: formatDateToDDMMYYYY(form.end_date.toString()),
+                  period: data.duration,
+                  type: data.duration_type,
+                  start_date: formatDateToDDMMYYYY(data.start_date?.toString()),
+                  end_date: formatDateToDDMMYYYY(data.end_date?.toString()),
                 },
               }
             : {}),
-          instalment_period: {
-            period: form.duration || 12,
-            type: "months",
-          },
+          // instalment_period: {
+          //   period: data.duration || 12,
+          //   type: "months",
+          // },
         },
       };
-      console.log(submissionData);
-      setLoading(false);
-    } else {
-      submissionData = {
-        type: requestForm.type === "Rent" ? "rent" : "buy",
-        deal_type: requestForm.deal_type,
-        property_type_id: requestForm?.property_types_required?.map(
-          (property_type) => property_type.id
-        ),
-        location_id: requestForm.locations?.map((location) => location.id),
-        no_bedroom: requestForm.bedrooms,
-        no_bathroom: requestForm.bathrooms,
-        // agent_assigned_id: Number(userId),
-        urgent: 0,
-        privacy: "public",
-        tag_id: requestForm.tag?.id,
-        // furnish_type_id: requestForm.furnish_type.id,
-        budget: {
-          transaction: requestForm.transaction?.toLowerCase(),
-          price: requestForm.price,
-          currency: requestForm.currency,
-          ...(requestForm.type === "Rent"
-            ? {
-                duration: {
-                  period: requestForm.duration,
-                  type: requestForm.duration_type,
-                  start_date: formatDateToDDMMYYYY(
-                    requestForm.start_date.toString()
-                  ),
-                  end_date: formatDateToDDMMYYYY(
-                    requestForm.end_date.toString()
-                  ),
-                },
-              }
-            : {}),
-          instalment_period: {
-            period: requestForm.duration || 12,
-            type: "months",
-          },
+
+      const endpoint = isInventory
+        ? "https://sbsapi.rentup.com.eg/api/inventories/add"
+        : "https://sbsapi.rentup.com.eg/api/requests/add";
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer 4e14bf9daafbe8d1fba7bf82f173b873",
         },
-      };
-      console.log(submissionData);
+        body: JSON.stringify(submissionData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Request failed: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log("✅ Success:", result);
+
+      setMessage(`${phoneStatus} listing saved successfully!`);
+    } catch (error) {
+      console.error("❌ Error saving data:", error);
+      setMessage("Failed to save listing. Please try again.");
+    } finally {
       setLoading(false);
     }
-  }, [form, requestForm, phoneStatus, setMessage]);
+  }, [form, requestForm, phoneStatus, dropdownOptions, setMessage]);
 
   const renderMainFormWrapper = () => (
     <div className="bg-white p-6 rounded-xl shadow-lg h-full overflow-y-auto">
