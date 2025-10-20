@@ -87,12 +87,21 @@ export default function GemeniExtraction() {
           ? "rent"
           : "buy",
         deal_type: data.deal_type,
-        property_type_id: isInventory
-          ? (data as InventoryForm).property_type?.id
-          : (data as RequestForm).property_types_required,
-        location_id: isInventory
-          ? (data as InventoryForm).location?.id
-          : (data as RequestForm).locations?.map((loc) => loc.id),
+
+        ...(isInventory
+          ? {
+              property_type_id: (data as InventoryForm).property_type?.id,
+            }
+          : {
+              property_types: (data as RequestForm).property_types_required,
+            }),
+        ...(isInventory
+          ? {
+              location_id: Number((data as InventoryForm).location?.id),
+            }
+          : {
+              locations: (data as RequestForm).locations?.map((loc) => Number(loc.id)),
+            }),
         no_bedroom: data.bedrooms,
         no_bathroom: data.bathrooms,
         user_id: isInventory
@@ -105,7 +114,9 @@ export default function GemeniExtraction() {
         privacy: isInventory ? "public" : (data as RequestForm).privacy,
         tag_id: (data as InventoryForm).tag?.id ?? (data as RequestForm).tag,
         furnish_type_id:
-          dropdownOptions.furnishTypes?.indexOf(data.furnish_type) ?? -1,
+          dropdownOptions.furnishTypes && data.furnish_type
+            ? dropdownOptions.furnishTypes.indexOf(data.furnish_type) + 1
+            : 1,
         budget: {
           transaction: data.transaction?.toLowerCase(),
           price: data.price,
@@ -114,22 +125,22 @@ export default function GemeniExtraction() {
             ? {
                 duration: {
                   period: data.duration,
-                  type: data.duration_type,
+                  type: data.duration_type.toLowerCase(),
                   start_date: formatDateToDDMMYYYY(data.start_date?.toString()),
                   end_date: formatDateToDDMMYYYY(data.end_date?.toString()),
                 },
               }
             : {}),
-          // instalment_period: {
-          //   period: data.duration || 12,
-          //   type: "months",
-          // },
+          instalment_period: {
+            period: data.duration || 12,
+            type: "months",
+          },
         },
       };
-
+      console.log(submissionData);
       const endpoint = isInventory
-        ? "https://sbsapi.rentup.com.eg/api/inventories/add"
-        : "https://sbsapi.rentup.com.eg/api/requests/add";
+        ? "https://sbsapi.rentup.com.eg/api/migrate/messages/inventory"
+        : "https://sbsapi.rentup.com.eg/api/migrate/messages/request";
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -187,6 +198,7 @@ export default function GemeniExtraction() {
           inventoryTransactionOptions={inventoryTransactionOptions}
           onChange={handleInventoryInputChange}
           handleObjectChanges={handleObjectChanges}
+          user={response?.userId || ""}
         />
       ) : (
         <RequestFormComponent

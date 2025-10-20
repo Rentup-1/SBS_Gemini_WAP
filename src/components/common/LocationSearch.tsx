@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Search, X, MapPin, Check } from 'lucide-react';
-import type { Location as LocationItem } from '../../interfaces'
+import type { Location } from '../../interfaces';
 
 // Single select props
 interface SingleSelectProps {
   mode: 'single';
-  value?: string;
-  onChange: (location: string) => void;
+  value?: Location ;
+  onChange: (location: Location | null) => void;
   placeholder?: string;
 }
 
 // Multi select props
 interface MultiSelectProps {
   mode: 'multi';
-  selectedLocations: LocationItem[];
-  onChange: (locations: LocationItem[]) => void;
+  selectedLocations: Location[] | null;
+  onChange: (locations: Location[]) => void;
   placeholder?: string;
 }
 
@@ -24,16 +24,16 @@ export const LocationSearch: React.FC<LocationSearchProps> = (props) => {
   const { mode, placeholder = "Search locations... (min 2 characters)" } = props;
   
   const [searchText, setSearchText] = useState(
-    mode === 'single' ? props.value || '' : ''
+    mode === 'single' ? props.value?.name || '' : ''
   );
-  const [locations, setLocations] = useState<LocationItem[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
   // ✅ FIXED: Sync searchText with prop value in single mode
   useEffect(() => {
     if (mode === 'single') {
-      setSearchText(props.value || '');
+      setSearchText(props.value?.name || '');
     }
   }, [mode, (props as SingleSelectProps).value]);
 
@@ -76,9 +76,9 @@ export const LocationSearch: React.FC<LocationSearchProps> = (props) => {
   };
 
   // Single select handler
-  const handleSelectSingle = (location: LocationItem) => {
+  const handleSelectSingle = (location: Location) => {
     if (mode === 'single') {
-      props.onChange(location.name);
+      props.onChange(location);
       setSearchText(location.name);
       setShowDropdown(false);
       setLocations([]);
@@ -86,15 +86,15 @@ export const LocationSearch: React.FC<LocationSearchProps> = (props) => {
   };
 
   // Multi-select handler
-  const toggleLocationMulti = (location: LocationItem) => {
+  const toggleLocationMulti = (location: Location) => {
     if (mode === 'multi') {
       const isSelected = props.selectedLocations?.some(item => item.id === location.id);
       
-      let newSelected: LocationItem[];
+      let newSelected: Location[];
       if (isSelected) {
-        newSelected = props.selectedLocations?.filter(item => item.id !== location.id);
+        newSelected = (props.selectedLocations || []).filter(item => item.id !== location.id);
       } else {
-        newSelected = [...props.selectedLocations, location];
+        newSelected = [...(props.selectedLocations || []), location];
       }
       
       props.onChange(newSelected);
@@ -108,14 +108,14 @@ export const LocationSearch: React.FC<LocationSearchProps> = (props) => {
 
   const removeLocation = (locationId: string) => {
     if (mode === 'multi') {
-      props.onChange(props.selectedLocations.filter(item => String(item.id) !== locationId));
+      props.onChange((props?.selectedLocations || []).filter(item => String(item.id) !== locationId));
     }
   };
 
   const handleClearSearch = () => {
     setSearchText('');
     if (mode === 'single') {
-      props.onChange('');
+      props.onChange(null);
     }
     setLocations([]);
     setShowDropdown(false);
@@ -218,6 +218,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = (props) => {
     </div>
   );
 };
+
 function useDebounce<T extends (...args: any[]) => any>(
   callback: T, 
   delay: number

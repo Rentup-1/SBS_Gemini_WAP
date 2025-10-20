@@ -14,6 +14,7 @@ interface InventoryFormProps {
   form: InventoryFormType;
   dropdownOptions: DropdownOptions;
   inventoryTransactionOptions: string[];
+  user: string;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
@@ -158,18 +159,8 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
         </label>
         <LocationSearch
           mode="single"
-          value={form?.location?.name}
-          onChange={(location) => {
-            // Create a synthetic event to match the form handler
-            const syntheticEvent = {
-              target: {
-                name: "location",
-                value: location,
-                type: "text",
-              } as HTMLInputElement,
-            } as React.ChangeEvent<HTMLInputElement>;
-            onChange(syntheticEvent);
-          }}
+          value={form?.location ?? undefined}
+          onChange={(location)=>handleObjectChanges(location, "location")}
           placeholder="Start typing to search for a location..."
         />
       </div>
