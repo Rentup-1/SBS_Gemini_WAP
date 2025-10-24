@@ -4,6 +4,7 @@ import { generateAiResonse } from '../services/geminiService';
 import { fetchSingleMessage } from '../services/messageApi'
 import { fetchLocation } from '../services/locationService';
 import { initialFormState, initialRequestFormState } from '../utils/constants';
+import { capitalizeFirst } from '../utils/formats';
 
 
 export const useAIParsing = (
@@ -108,32 +109,23 @@ export const useAIParsing = (
           if (matchedType) propertyTypesRequired.push(String(matchedType.id));
         }
 
-        // Match property types from API response to dropdown objects
-        const tags = [];
-        if (parsedData.data.tag && Array.isArray(parsedData.data.tag)) {
-          for (const ptName of parsedData.data.tag) {
-            const matchedType = findTag(ptName);
-            if (matchedType) tags.push(String(matchedType.id));
-          }
-        } else if (parsedData.data.tag) {
-          const matchedType = findTag(parsedData.data.tag);
-          if (matchedType) tags.push(String(matchedType.id));
-        }
+       
+        const tagObj = findTag(parsedData.data.tag)
         const newRequestForm: RequestForm = {
           type: parsedData.data.type === "buy" ? "Buy" : "Rent",
           status: parsedData.data.status || initialRequestFormState.status,
-          privacy: parsedData.data.privacy || initialRequestFormState.privacy,
+          privacy: capitalizeFirst(parsedData.data.privacy) || initialRequestFormState.privacy,
           price: parsedData.data.budget?.price !== undefined ? parsedData.data.budget.price : initialRequestFormState.price,
           currency: parsedData.data.budget?.currency || initialRequestFormState.currency,
-          transaction: parsedData.data.budget.transaction === "yearly" ? "Yearly" : "Monthly",
+          transaction: capitalizeFirst(parsedData.data.budget.transaction) || initialRequestFormState.transaction,
           duration: parsedData.data.duration !== undefined ? parsedData.data.duration : initialRequestFormState.duration,
           duration_type: parsedData.data.duration_type || initialRequestFormState.duration_type,
           start_date: parsedData.data.start_date || initialRequestFormState.start_date,
           end_date: parsedData.data.end_date || initialRequestFormState.end_date,
           bedrooms: parsedData.data.no_bedroom !== undefined ? parsedData.data.no_bedroom : initialRequestFormState.bedrooms,
           bathrooms: parsedData.data.no_bathroom !== undefined ? parsedData.data.no_bathroom : initialRequestFormState.bathrooms,
-          furnish_type: parsedData.data.furnish_type || initialRequestFormState.furnish_type,
-          deal_type: parsedData.data.deal_type || initialRequestFormState.deal_type,
+          furnish_type: capitalizeFirst(parsedData.data.furnish_type) || initialRequestFormState.furnish_type,
+          deal_type: parsedData.data.deal_type === "side-by-side"? "Side-by-Side": "50:50",
           whatsapp_message: parsedData.data.whatsapp_message || whatsappInput,
           reference_id: parsedData.data.reference_id,
           locations: locationObjs.length > 0 ? locationObjs : initialRequestFormState.locations,
@@ -141,8 +133,9 @@ export const useAIParsing = (
           options_required: parsedData.data.options_required || initialRequestFormState.options_required,
           assigned_agent: parsedData.data.assigned_agent || initialRequestFormState.assigned_agent,
           owner: parsedData.data.owner || initialRequestFormState.owner,
-          tag: tags.length > 0 ? tags : initialRequestFormState.tag,
-          is_urgent: parsedData.data.is_urgent !== undefined ? parsedData.data.is_urgent : initialRequestFormState.is_urgent,
+          tag: tagObj || initialRequestFormState.tag,
+          is_urgent: parsedData.data.urgent !== undefined ? parsedData.data.urgent : initialRequestFormState.is_urgent,
+          
         };
 
         setRequestForm({
@@ -171,10 +164,10 @@ export const useAIParsing = (
         const newInventoryForm: InventoryForm = {
           type: parsedData.data.type === "sell" ? "For Sale" : "For Rent",
           property_type: propertyTypeObj || initialFormState.property_type,
-          furnish_type: parsedData.data.furnish_type || initialFormState.furnish_type,
+          furnish_type: capitalizeFirst(parsedData.data.furnish_type) || initialFormState.furnish_type,
           price: parsedData.data.Price?.price !== undefined ? parsedData.data.Price.price : initialFormState.price,
           currency: parsedData.data.budget?.currency || initialFormState.currency,
-          transaction: parsedData.data.Price.transaction || initialFormState.transaction,
+          transaction: capitalizeFirst(parsedData.data.Price.transaction) || initialFormState.transaction,
           duration: parsedData.data.duration !== undefined ? parsedData.data.duration : initialFormState.duration,
           duration_type: parsedData.data.duration_type || initialFormState.duration_type,
           start_date: parsedData.data.start_date || initialFormState.start_date,
@@ -183,8 +176,8 @@ export const useAIParsing = (
           bathrooms: parsedData.data.no_bathroom !== undefined ? parsedData.data.no_bathroom : initialFormState.bathrooms,
           location: locationObj || initialFormState.location,
           tag: tagObj || initialFormState.tag,
-          deal_type: parsedData.data.deal_type || initialFormState.deal_type,
-          is_urgent: parsedData.data.is_urgent !== undefined ? parsedData.data.is_urgent : initialFormState.is_urgent,
+          deal_type: parsedData.data.deal_type === "side-by-side"? "Side-by-Side": "50:50",
+          is_urgent: parsedData.data.urgent !== undefined ? parsedData.data.urgent : initialFormState.is_urgent,
           whatsapp_message: parsedData.data.whatsapp_message || whatsappInput,
           reference_id: parsedData.data.reference_id,
           timestamp: parsedData.data.timestamp || initialFormState.timestamp,

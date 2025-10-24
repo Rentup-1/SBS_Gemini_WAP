@@ -23,7 +23,11 @@ interface RequestFormProps {
   ) => void;
   onLocationChange: (locations: Location[]) => void;
   handleMultiSelectChange: (name: string, value: string[]) => void;
-  handleObjectChanges: (object: any, fieldName: string,formType: string) => void;
+  handleObjectChanges: (
+    object: any,
+    fieldName: string,
+    formType: string
+  ) => void;
 }
 
 export const RequestForm: React.FC<RequestFormProps> = ({
@@ -54,13 +58,7 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           onChange={onChange}
           options={["Rent", "Buy"]}
         />
-        <SelectField
-          label="Status"
-          name="status"
-          value={form.status}
-          onChange={onChange}
-          options={dropdownOptions.requestStatuses || []}
-        />
+
         <SelectField
           label="Privacy"
           name="privacy"
@@ -220,18 +218,22 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           options={dropdownOptions.listedByUsers || []}
           placeholder="Search or enter user name/ID"
         />
-
-        <MultiSelectField
+        <SelectField
           label="Tag"
           name="tag"
           value={form.tag}
-          onChange={handleMultiSelectChange}
+          onObjectChange={(tag) => {
+            // Update form with full object
+            handleObjectChanges(tag, "tag", "Request");
+          }}
           options={
             dropdownOptions.tags
-              ?.filter((category) => category.name === form.type)
-              ?.flatMap((category) => category.tags) || []
+              ?.filter(
+                (category) =>
+                  category.name === (form.type === "Buy" ? "Buy" : "Rent")
+              )
+              ?.flatMap((category) => category.tags) || [] // Pass Tag objects
           }
-          placeholder="Select Tags..."
         />
       </div>
 

@@ -131,7 +131,7 @@ export default function GemeniExtraction() {
           : (data as RequestForm).client_user?.id,
         urgent: data.is_urgent,
         privacy: isInventory ? "public" : (data as RequestForm).privacy,
-        tag_id: (data as InventoryForm).tag?.id ?? (data as RequestForm).tag,
+        tag_id: (data as InventoryForm).tag?.id ?? (data as RequestForm).tag?.id,
         furnish_type_id:
           dropdownOptions.furnishTypes && data.furnish_type
             ? dropdownOptions.furnishTypes.indexOf(data.furnish_type) + 1

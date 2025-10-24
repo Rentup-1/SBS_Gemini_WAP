@@ -13,3 +13,8 @@ export function formatReadableDate(isoString: string): string {
     hour12: true,
   }).format(date);
 }
+
+export function capitalizeFirst(str: string): string {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}

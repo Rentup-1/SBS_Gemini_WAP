@@ -110,7 +110,8 @@ export const useFormHandlers = (dropdownOptions: DropdownOptions) => {
   }, []);
 
   // New handler for multi-select fields (returns array of IDs directly)
-  const handleMultiSelectChange = useCallback((name: string, value: string[]) => {
+  const handleMultiSelectChange = useCallback((name: string, value: string[] | number[]) => {
+    
     setRequestForm(prev => ({
       ...prev,
       [name]: value
