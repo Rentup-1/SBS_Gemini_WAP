@@ -17,7 +17,7 @@ const HARDCODED_DATA = {
   requestStatuses: ['Pending', 'Active', 'Closed'],
   requestPrivacy: ['Public', 'Private'],
   assignmentUsers: ['None', 'Agent A', 'Agent B', 'Owner C'],
-  requestOptions: ['Pool', 'Garden', 'Security', 'AC', 'Elevator'],
+  requestOptions: [],
 };
 export type FormType = 'Inventory' | 'Request';
 
@@ -68,5 +68,5 @@ export const useDropdownData = ({ formType }: UseDropdownDataProps = {}) => {
     fetchData();
   }, [formType]);
 
-  return { dropdownOptions, loading, error };
+  return { dropdownOptions, loading, error, setDropdownOptions };
 };

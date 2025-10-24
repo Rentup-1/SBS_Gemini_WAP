@@ -6,6 +6,7 @@ import {
   type User,
 } from "../../interfaces";
 import {
+  CheckboxGroup,
   InputField,
   LocationSearch,
   MultiSelectField,
@@ -136,6 +137,14 @@ export const RequestForm: React.FC<RequestFormProps> = ({
         </div>
       )}
       <InputField
+        label="Reference ID"
+        name="reference_id"
+        type="text"
+        value={form.reference_id}
+        onChange={onChange}
+        placeholder="Type the Refrence Id"
+      />
+      <InputField
         label="WhatsApp Message (Original)"
         name="whatsapp_message"
         value={form.whatsapp_message}
@@ -164,6 +173,22 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           name="bathrooms"
           type="number"
           value={form.bathrooms}
+          onChange={onChange}
+          placeholder="1"
+        />
+        <InputField
+          label="Master Bedrooms"
+          name="no_master_bedroom"
+          type="number"
+          value={form.no_master_bedroom}
+          onChange={onChange}
+          placeholder="1"
+        />
+        <InputField
+          label="Master Bedrooms"
+          name="no_master_bedroom"
+          type="number"
+          value={form.no_master_bedroom}
           onChange={onChange}
           placeholder="1"
         />
@@ -199,6 +224,18 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           placeholder="Select property types..."
         />
       </div>
+      {dropdownOptions.requestOptions &&
+      dropdownOptions.requestOptions?.length > 0 ? (
+        <CheckboxGroup
+          label="Options"
+          name="options_required"
+          options={dropdownOptions.requestOptions || []}
+          selectedValues={form.options_required || []}
+          onChange={onChange}
+          maxHeight="max-h-40"
+          selectAllByDefault
+        />
+      ) : null}
     </div>
   );
 
@@ -251,6 +288,22 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           className="ml-2 block text-sm text-gray-900"
         >
           Mark as Urgent
+        </label>
+      </div>
+      <div className="flex items-center pt-2">
+        <input
+          id="is_direct_req"
+          name="is_direct"
+          type="checkbox"
+          checked={form.is_direct}
+          onChange={onChange}
+          className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+        />
+        <label
+          htmlFor="is_direct_req"
+          className="ml-2 block text-sm text-gray-900"
+        >
+          Mark as Direct
         </label>
       </div>
     </div>

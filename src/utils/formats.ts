@@ -18,3 +18,20 @@ export function capitalizeFirst(str: string): string {
   if (!str) return "";
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export const extractNameAndNumber = (input: string): { name: string; number: string } => {
+  const match = input.match(/^(.+?)\s*\((\d+)\)$/);
+  
+  if (match) {
+    return {
+      name: match[1].trim(),     // "Test"
+      number: match[2].trim()    // "51651"
+    };
+  }
+  
+  // Fallback if pattern doesn't match
+  return {
+    name: input,
+    number: ""
+  };
+};

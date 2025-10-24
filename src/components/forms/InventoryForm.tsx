@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
   type InventoryForm as InventoryFormType,
   type DropdownOptions,
@@ -9,7 +9,9 @@ import {
   SearchableInput,
   SelectField,
   LocationSearch,
+  CheckboxGroup,
 } from "../common";
+import { extractNameAndNumber } from "../../utils/formats";
 
 interface InventoryFormProps {
   form: InventoryFormType;
@@ -30,11 +32,49 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
   onChange,
   handleObjectChanges,
 }) => {
+  const updateClientDetails = useCallback(
+    (userData: User) => {
+      const { name, number } = extractNameAndNumber(userData.name);
+
+      // Batch the updates to avoid multiple re-renders
+      handleObjectChanges(userData, "listed_by");
+
+      // Create synthetic events for form field updates
+      const clientNameEvent = {
+        target: {
+          name: "client_name",
+          type: "text",
+          value: name || "",
+        },
+      } as React.ChangeEvent<HTMLInputElement>;
+
+      const clientPhoneEvent = {
+        target: {
+          name: "client_phone",
+          type: "text",
+          value: number || "",
+        },
+      } as React.ChangeEvent<HTMLInputElement>;
+
+      onChange(clientNameEvent);
+      onChange(clientPhoneEvent);
+    },
+    [handleObjectChanges, onChange]
+  );
+
+  // Effect to handle user changes
   useEffect(() => {
-    if (user !== null){
-      handleObjectChanges(user, "listed_by")
+    if (user) {
+      // Only update if the listed_by user has actually changed
+      const currentListedById = form.listed_by?.id;
+      const newUserId = user.id;
+
+      if (currentListedById !== newUserId) {
+        updateClientDetails(user);
+      }
     }
-  },[user])
+  }, [user, form.listed_by, updateClientDetails]);
+
   const renderCoreDetails = () => (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">
@@ -64,6 +104,15 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           value={form.furnish_type}
           onChange={onChange}
           options={dropdownOptions.furnishTypes || []}
+        />
+        <InputField
+          label="BUA"
+          name="bua"
+          type="number"
+          value={form.bua}
+          onChange={onChange}
+          placeholder="0"
+          trailingDiv={<span className="text-gray-500">m²</span>}
         />
       </div>
     </div>
@@ -159,6 +208,14 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           onChange={onChange}
           placeholder="1"
         />
+        <InputField
+          label="Master Bedrooms"
+          name="no_master_bedroom"
+          type="number"
+          value={form.no_master_bedroom}
+          onChange={onChange}
+          placeholder="1"
+        />
       </div>
       <div className="col-span-4 mt-4">
         <label className="text-sm font-medium text-gray-700 mb-2 block">
@@ -167,7 +224,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
         <LocationSearch
           mode="single"
           value={form?.location ?? undefined}
-          onChange={(location)=>handleObjectChanges(location, "location")}
+          onChange={(location) => handleObjectChanges(location, "location")}
           placeholder="Start typing to search for a location..."
         />
       </div>
@@ -205,6 +262,18 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           options={dropdownOptions.dealTypes || []}
         />
       </div>
+      {dropdownOptions.requestOptions &&
+      dropdownOptions.requestOptions?.length > 0 ? (
+        <CheckboxGroup
+          label="Options"
+          name="options_required"
+          options={dropdownOptions.requestOptions || []}
+          selectedValues={form.options_required || []}
+          onChange={onChange}
+          maxHeight="max-h-40"
+          selectAllByDefault
+        />
+      ) : null}
       <InputField
         label="Reference ID"
         name="reference_id"
@@ -237,6 +306,22 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           Mark as Urgent
         </label>
       </div>
+      <div className="flex items-center pt-2">
+        <input
+          id="is_direct_inv"
+          name="is_direct"
+          type="checkbox"
+          checked={form.is_direct}
+          onChange={onChange}
+          className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+        />
+        <label
+          htmlFor="is_direct_inv"
+          className="ml-2 block text-sm text-gray-900"
+        >
+          Mark as Direct
+        </label>
+      </div>
     </div>
   );
 
@@ -251,27 +336,29 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           name="listed_by"
           value={form.listed_by || null}
           onObjectSelect={(user) => {
-            handleObjectChanges(user, "listed_by")
+            handleObjectChanges(user, "listed_by");
+            updateClientDetails(user as User);
           }}
-
           options={dropdownOptions.listedByUsers || []}
           placeholder="Search or enter user name/ID"
         />
-        {/* <SearchableInput
+        <InputField
           label="Client Name"
           name="client_name"
           value={form.client_name}
           onChange={onChange}
-          options={dropdownOptions.clientNames || []}
-          placeholder="Search or enter new client name"
+          placeholder="Client Name"
+          readOnly
         />
+
         <InputField
           label="Client Phone"
           name="client_phone"
           value={form.client_phone}
           onChange={onChange}
           placeholder="Phone Number"
-        /> */}
+          readOnly
+        />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <InputField

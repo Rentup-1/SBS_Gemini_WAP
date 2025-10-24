@@ -73,7 +73,7 @@ export const useFormHandlers = (dropdownOptions: DropdownOptions) => {
     }
 
     if (type === 'checkbox') {
-      if (name === 'is_urgent') {
+      if (name === 'is_urgent' || name === "is_direct") {
         setRequestForm(prev => ({
           ...prev,
           [name]: checked

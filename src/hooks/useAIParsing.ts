@@ -13,7 +13,8 @@ export const useAIParsing = (
   setRequestForm: (form: RequestForm) => void,
   requestForm: RequestForm,
   setWhatsappInput: (input: string) => void,
-  dropdownOptions: DropdownOptions
+  dropdownOptions: DropdownOptions,
+  setDropdownOptions: (dropdownOptions: DropdownOptions) => void
 ) => {
   const [aiResponseRaw, setAiResponseRaw] = useState('');
   const [loading, setLoading] = useState(false);
@@ -109,7 +110,10 @@ export const useAIParsing = (
           if (matchedType) propertyTypesRequired.push(String(matchedType.id));
         }
 
-       
+       setDropdownOptions({
+        ...dropdownOptions,
+        requestOptions: parsedData.data.options
+       })
         const tagObj = findTag(parsedData.data.tag)
         const newRequestForm: RequestForm = {
           type: parsedData.data.type === "buy" ? "Buy" : "Rent",
@@ -124,6 +128,7 @@ export const useAIParsing = (
           end_date: parsedData.data.end_date || initialRequestFormState.end_date,
           bedrooms: parsedData.data.no_bedroom !== undefined ? parsedData.data.no_bedroom : initialRequestFormState.bedrooms,
           bathrooms: parsedData.data.no_bathroom !== undefined ? parsedData.data.no_bathroom : initialRequestFormState.bathrooms,
+          no_master_bedroom: parsedData.data.no_master_bedroom !== undefined ? parsedData.data.no_master_bedroom : initialRequestFormState.no_master_bedroom,
           furnish_type: capitalizeFirst(parsedData.data.furnish_type) || initialRequestFormState.furnish_type,
           deal_type: parsedData.data.deal_type === "side-by-side"? "Side-by-Side": "50:50",
           whatsapp_message: parsedData.data.whatsapp_message || whatsappInput,
@@ -135,7 +140,8 @@ export const useAIParsing = (
           owner: parsedData.data.owner || initialRequestFormState.owner,
           tag: tagObj || initialRequestFormState.tag,
           is_urgent: parsedData.data.urgent !== undefined ? parsedData.data.urgent : initialRequestFormState.is_urgent,
-          
+          bua: parsedData.data.bua || initialRequestFormState.bua,
+          is_direct: parsedData.data.is_direct || initialRequestFormState.is_direct
         };
 
         setRequestForm({
@@ -157,7 +163,10 @@ export const useAIParsing = (
           const locations = await fetchLocation(normalizeLocation);
           locationObj = locations[0] || null;
         }
-
+        setDropdownOptions({
+        ...dropdownOptions,
+        requestOptions: parsedData.data.more_options && parsedData.data.more_options !== "Not provided"? parsedData.data.more_options?.split(","): []
+       })
         // Match property type from API response to dropdown object
         const propertyTypeObj = findPropertyType(parsedData.data.property_type);
         const tagObj = findTag(parsedData.data.tag)
@@ -174,6 +183,7 @@ export const useAIParsing = (
           end_date: parsedData.data.end_date || initialFormState.end_date,
           bedrooms: parsedData.data.no_bedroom !== undefined ? parsedData.data.no_bedroom : initialFormState.bedrooms,
           bathrooms: parsedData.data.no_bathroom !== undefined ? parsedData.data.no_bathroom : initialFormState.bathrooms,
+          no_master_bedroom: parsedData.data.no_master_bedroom !== undefined ? parsedData.data.no_master_bedroom : initialFormState.no_master_bedroom,
           location: locationObj || initialFormState.location,
           tag: tagObj || initialFormState.tag,
           deal_type: parsedData.data.deal_type === "side-by-side"? "Side-by-Side": "50:50",
@@ -185,6 +195,9 @@ export const useAIParsing = (
           client_name: parsedData.data.client?.name || '',
           client_phone: parsedData.data.client?.phone || '',
           client_email: parsedData.data.client?.email || '',
+          bua: parsedData.data.bua || initialFormState.bua,
+          is_direct: parsedData.data.is_direct || initialFormState.is_direct,
+          options_required: []
         };
 
         setInventoryForm({

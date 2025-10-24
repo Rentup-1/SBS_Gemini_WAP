@@ -26,7 +26,7 @@ export default function GemeniExtraction() {
   );
   const [response, setResonse] = useState<Message>();
   const [user, setUser] = useState<User>();
-  const { dropdownOptions } = useDropdownData({ formType: phoneStatus });
+  const { dropdownOptions, setDropdownOptions } = useDropdownData({ formType: phoneStatus });
   const {
     form,
     setForm,
@@ -55,7 +55,7 @@ export default function GemeniExtraction() {
     handleConfirmParse,
     getSingleMessage,
     setAiResponseRaw,
-  } = useAIParsing(setForm,form, setRequestForm,requestForm, setWhatsappInput, dropdownOptions);
+  } = useAIParsing(setForm,form, setRequestForm,requestForm, setWhatsappInput, dropdownOptions, setDropdownOptions);
 
   useEffect(() => {
     if (location && location?.state && location?.state?.type) {
@@ -130,7 +130,7 @@ export default function GemeniExtraction() {
           ? (data as InventoryForm).listed_by?.id
           : (data as RequestForm).client_user?.id,
         urgent: data.is_urgent,
-        privacy: isInventory ? "public" : (data as RequestForm).privacy,
+        privacy: isInventory ? "public" : (data as RequestForm).privacy.toLowerCase(),
         tag_id: (data as InventoryForm).tag?.id ?? (data as RequestForm).tag?.id,
         furnish_type_id:
           dropdownOptions.furnishTypes && data.furnish_type

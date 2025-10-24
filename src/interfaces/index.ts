@@ -22,6 +22,7 @@ export interface InventoryForm {
   type: "For Sale" | "For Rent";
   property_type?: PropertyType;
   furnish_type: string;
+  bua: number;
   price: number;
   currency: string;
   transaction: string;
@@ -31,6 +32,7 @@ export interface InventoryForm {
   end_date: string;
   bedrooms: number;
   bathrooms: number;
+  no_master_bedroom: number;
   location?: Location;
   listed_by?: User;
   tag?: Tag;
@@ -38,11 +40,14 @@ export interface InventoryForm {
   reference_id: string;
   whatsapp_message: string;
   is_urgent: boolean;
+  is_direct: boolean;
   timestamp: string;
   image_urls: string[];
   client_name: string;
   client_phone: string;
   client_email: string;
+  options_required: string[];
+
 }
 
 export interface RequestForm {
@@ -58,7 +63,9 @@ export interface RequestForm {
   end_date: string;
   bedrooms: number;
   bathrooms: number;
+  no_master_bedroom: number;
   furnish_type: string;
+  bua: number;
   deal_type: string;
   reference_id: string;
   locations?: Location[];
@@ -69,6 +76,7 @@ export interface RequestForm {
   owner: string;
   tag?: Tag;
   is_urgent: boolean;
+  is_direct: boolean;
   whatsapp_message: string;
 }
 
@@ -79,6 +87,8 @@ export interface InputFieldProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   name: string;
   placeholder?: string;
+  readOnly?: boolean;
+  trailingDiv?: React.ReactNode; 
 }
 
 export interface SelectFieldProps {
