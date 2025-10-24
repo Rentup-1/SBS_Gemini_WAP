@@ -4,6 +4,7 @@ import {
   type LocationState,
   type Message,
   type RequestForm,
+  type User,
 } from "../interfaces";
 import { useDropdownData } from "../hooks/useDropdownData";
 import { useFormHandlers } from "../hooks/useFormHandlers";
@@ -12,12 +13,19 @@ import { InventoryForm as InventoryFormComponent } from "../components/forms/Inv
 import { RequestForm as RequestFormComponent } from "../components/forms/RequestForm";
 import { AIPanel } from "../components/ai/AIPanel";
 import { useLocation } from "react-router-dom";
+import { AlertPopup } from "../components/common";
 
 export default function GemeniExtraction() {
+  const [alertState, setAlertState] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+  });
   const [phoneStatus, setPhoneStatus] = useState<"Inventory" | "Request">(
     "Inventory"
   );
   const [response, setResonse] = useState<Message>();
+  const [user, setUser] = useState<User>();
   const { dropdownOptions } = useDropdownData({ formType: phoneStatus });
   const {
     form,
@@ -47,7 +55,7 @@ export default function GemeniExtraction() {
     handleConfirmParse,
     getSingleMessage,
     setAiResponseRaw,
-  } = useAIParsing(setForm, setRequestForm, setWhatsappInput);
+  } = useAIParsing(setForm,form, setRequestForm,requestForm, setWhatsappInput, dropdownOptions);
 
   useEffect(() => {
     if (location && location?.state && location?.state?.type) {
@@ -58,10 +66,15 @@ export default function GemeniExtraction() {
         const res = await getSingleMessage(location?.state?.id);
         setResonse(res);
         setWhatsappInput(res?.message || "");
+        setUser({
+          id : Number(res?.userId.slice(1) || "0")|| 0,
+          name: `${res?.contactName} (${res?.contactPhone})`
+        })
       }
     };
     fetchSingleMessage();
   }, [location, getSingleMessage]);
+  
   function formatDateToDDMMYYYY(isoString: string): string {
     const date = new Date(isoString);
     const day = String(date.getDate()).padStart(2, "0");
@@ -79,6 +92,10 @@ export default function GemeniExtraction() {
       const data = isInventory ? form : requestForm;
 
       const submissionData = {
+        slug: {
+          en: "generating",
+          ar: "جاري-معالجة",
+        },
         type: isInventory
           ? data.type === "For Rent"
             ? "for_rent"
@@ -100,7 +117,9 @@ export default function GemeniExtraction() {
               location_id: Number((data as InventoryForm).location?.id),
             }
           : {
-              locations: (data as RequestForm).locations?.map((loc) => Number(loc.id)),
+              locations: (data as RequestForm).locations?.map((loc) =>
+                Number(loc.id)
+              ),
             }),
         no_bedroom: data.bedrooms,
         no_bathroom: data.bathrooms,
@@ -151,12 +170,31 @@ export default function GemeniExtraction() {
         body: JSON.stringify(submissionData),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Request failed: ${errorText}`);
+        // const errorText = await response.text();
+        let errorMessage = "Creation failed";
+        if (result.errors && typeof result.errors === "object") {
+          const errorList = Object.entries(result.errors)
+            .map(
+              ([field, messages]) =>
+                `${field}: ${
+                  Array.isArray(messages) ? messages.join(", ") : messages
+                }`
+            )
+            .join("\n");
+          errorMessage = `Validation errors:\n${errorList}`;
+          // console.log(errorMessage);
+          setAlertState({
+            isOpen: true,
+            title: "Creation Error",
+            message: errorMessage,
+          });
+          throw new Error(`Request failed: ${errorMessage}`);
+        }
       }
 
-      const result = await response.json();
       console.log("✅ Success:", result);
 
       setMessage(`${phoneStatus} listing saved successfully!`);
@@ -198,7 +236,7 @@ export default function GemeniExtraction() {
           inventoryTransactionOptions={inventoryTransactionOptions}
           onChange={handleInventoryInputChange}
           handleObjectChanges={handleObjectChanges}
-          user={response?.userId || ""}
+          user={user || null}
         />
       ) : (
         <RequestFormComponent
@@ -208,6 +246,8 @@ export default function GemeniExtraction() {
           onChange={handleRequestInputChange}
           onLocationChange={handleLocationChange}
           handleMultiSelectChange={handleMultiSelectChange}
+          handleObjectChanges={handleObjectChanges}
+          user={user || null}
         />
       )}
 
@@ -298,6 +338,15 @@ export default function GemeniExtraction() {
             onConfirm={() =>
               handleConfirmParse(aiResponseRaw, whatsappInput, phoneStatus)
             }
+          />
+          <AlertPopup
+            isOpen={alertState.isOpen}
+            onClose={() =>
+              setAlertState((prev) => ({ ...prev, isOpen: false }))
+            }
+            title={alertState.title}
+            message={alertState.message}
+            type="error"
           />
         </div>
       </div>

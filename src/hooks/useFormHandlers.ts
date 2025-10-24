@@ -117,12 +117,18 @@ export const useFormHandlers = (dropdownOptions: DropdownOptions) => {
     }));
   }, []);
 
-  const handleObjectChanges = useCallback((object: Tag | PropertyType | User, fieldName: string) => {
-    console.log(object)
+  const handleObjectChanges = useCallback((object: Tag | PropertyType | User, fieldName: string, formType: string = "Inventory") => {
+    if(formType === "Inventory"){
     setForm((prev) => ({
       ...prev,
       [fieldName]: object,
     }));
+  }else{
+    setRequestForm((prev) => ({
+      ...prev,
+      [fieldName]: object,
+    }))
+  }
   }, []);
 
 return {

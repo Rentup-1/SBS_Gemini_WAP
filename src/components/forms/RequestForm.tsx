@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   type RequestForm as RequestFormType,
   type DropdownOptions,
   type Location,
+  type User,
 } from "../../interfaces";
 import {
   InputField,
@@ -16,21 +17,30 @@ interface RequestFormProps {
   form: RequestFormType;
   dropdownOptions: DropdownOptions;
   requestTransactionOptions: string[];
+  user: User | null;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
   onLocationChange: (locations: Location[]) => void;
   handleMultiSelectChange: (name: string, value: string[]) => void;
+  handleObjectChanges: (object: any, fieldName: string,formType: string) => void;
 }
 
 export const RequestForm: React.FC<RequestFormProps> = ({
   form,
   dropdownOptions,
   requestTransactionOptions,
+  user,
   onChange,
   onLocationChange,
   handleMultiSelectChange,
+  handleObjectChanges,
 }) => {
+  useEffect(() => {
+    if (user !== null) {
+      handleObjectChanges(user, "client_user", "Request");
+    }
+  }, [user]);
   const renderCoreDetails = () => (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">
@@ -202,27 +212,25 @@ export const RequestForm: React.FC<RequestFormProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <SearchableInput
           label="Listed By (User)"
-          name="listed_by"
+          name="client_user"
           value={form.client_user || null}
           onObjectSelect={(user) => {
-            console.log("User Selected is ", user)
-          }}
-          onSelect={(selected) => {
-            // selected will be the full User object
-            console.log("Selected user:", selected);
+            handleObjectChanges(user, "client_user", "Request");
           }}
           options={dropdownOptions.listedByUsers || []}
           placeholder="Search or enter user name/ID"
         />
-        
+
         <MultiSelectField
           label="Tag"
           name="tag"
-          value={form.tag} 
+          value={form.tag}
           onChange={handleMultiSelectChange}
-          options={dropdownOptions.tags
+          options={
+            dropdownOptions.tags
               ?.filter((category) => category.name === form.type)
-              ?.flatMap((category) => category.tags) || []}
+              ?.flatMap((category) => category.tags) || []
+          }
           placeholder="Select Tags..."
         />
       </div>

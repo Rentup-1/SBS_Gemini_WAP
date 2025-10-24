@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   type InventoryForm as InventoryFormType,
   type DropdownOptions,
+  type User,
 } from "../../interfaces";
 import {
   InputField,
@@ -14,7 +15,7 @@ interface InventoryFormProps {
   form: InventoryFormType;
   dropdownOptions: DropdownOptions;
   inventoryTransactionOptions: string[];
-  user: string;
+  user: User | null;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
@@ -25,9 +26,15 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
   form,
   dropdownOptions,
   inventoryTransactionOptions,
+  user,
   onChange,
   handleObjectChanges,
 }) => {
+  useEffect(() => {
+    if (user !== null){
+      handleObjectChanges(user, "listed_by")
+    }
+  },[user])
   const renderCoreDetails = () => (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">

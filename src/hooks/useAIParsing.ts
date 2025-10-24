@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { type InventoryForm, type RequestForm, type Location } from '../interfaces';
+import { type InventoryForm, type RequestForm, type Location, type DropdownOptions, type PropertyType, type Tag } from '../interfaces';
 import { generateAiResonse } from '../services/geminiService';
 import { fetchSingleMessage } from '../services/messageApi'
 import { fetchLocation } from '../services/locationService';
@@ -8,12 +8,40 @@ import { initialFormState, initialRequestFormState } from '../utils/constants';
 
 export const useAIParsing = (
   setInventoryForm: (form: InventoryForm) => void,
+  inventoryForm : InventoryForm,
   setRequestForm: (form: RequestForm) => void,
-  setWhatsappInput: (input: string) => void
+  requestForm: RequestForm,
+  setWhatsappInput: (input: string) => void,
+  dropdownOptions: DropdownOptions
 ) => {
   const [aiResponseRaw, setAiResponseRaw] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+
+  // Helper function to find property type object by name
+  const findPropertyType = useCallback((propertyTypeName: string | undefined): PropertyType | null => {
+    if (!propertyTypeName) return null;
+
+    const normalizedName = propertyTypeName?.toLowerCase().trim();
+    return dropdownOptions?.propertyTypes?.find(
+      pt =>
+        pt.name?.toLowerCase().trim() === normalizedName ||
+        String(pt.id) === propertyTypeName
+    ) || null;
+  }, [dropdownOptions.propertyTypes]);
+
+  const findTag = useCallback((tagName: string | undefined): Tag | null => {
+    if (!tagName) return null;
+    console.log(tagName)
+    const normalizedName = tagName.toLowerCase().trim();
+    return dropdownOptions.tags
+      ?.flatMap((category) => category.tags).find(
+        tag =>
+          tag.name?.toLowerCase().trim() === normalizedName ||
+          String(tag.id) === tagName
+      ) || null
+
+  }, [dropdownOptions.tags]);
 
   const handleGeminiParse = useCallback(async (whatsappInput: string, formType: string) => {
     if (!whatsappInput.trim()) {
@@ -42,21 +70,20 @@ export const useAIParsing = (
   }, []);
 
   const handleConfirmParse = useCallback(async (
-    aiResponseRaw: string, 
-    whatsappInput: string, 
+    aiResponseRaw: string,
+    whatsappInput: string,
     formType: string
   ) => {
     if (!aiResponseRaw) {
       setMessage('No AI data to confirm. Please generate data first.');
       return;
     }
-    
+
     try {
       const parsedData = JSON.parse(aiResponseRaw);
-      console.log(parsedData)
       if (formType === "Request") {
         // Handle Request Form
-        let locationObjs: Location[] = [];
+        const locationObjs: Location[] = [];
         if (parsedData.data.locations && parsedData.data.locations.length > 0) {
           for (const loc of parsedData.data.locations) {
             const locations = await fetchLocation(loc);
@@ -69,13 +96,36 @@ export const useAIParsing = (
           if (locations[0]) locationObjs.push(locations[0]);
         }
 
+        // Match property types from API response to dropdown objects
+        const propertyTypesRequired = [];
+        if (parsedData.data.property_types_required && Array.isArray(parsedData.data.property_types_required)) {
+          for (const ptName of parsedData.data.property_types_required) {
+            const matchedType = findPropertyType(ptName);
+            if (matchedType) propertyTypesRequired.push(String(matchedType.id));
+          }
+        } else if (parsedData.data.property_type) {
+          const matchedType = findPropertyType(parsedData.data.property_type);
+          if (matchedType) propertyTypesRequired.push(String(matchedType.id));
+        }
+
+        // Match property types from API response to dropdown objects
+        const tags = [];
+        if (parsedData.data.tag && Array.isArray(parsedData.data.tag)) {
+          for (const ptName of parsedData.data.tag) {
+            const matchedType = findTag(ptName);
+            if (matchedType) tags.push(String(matchedType.id));
+          }
+        } else if (parsedData.data.tag) {
+          const matchedType = findTag(parsedData.data.tag);
+          if (matchedType) tags.push(String(matchedType.id));
+        }
         const newRequestForm: RequestForm = {
           type: parsedData.data.type === "buy" ? "Buy" : "Rent",
           status: parsedData.data.status || initialRequestFormState.status,
           privacy: parsedData.data.privacy || initialRequestFormState.privacy,
           price: parsedData.data.budget?.price !== undefined ? parsedData.data.budget.price : initialRequestFormState.price,
           currency: parsedData.data.budget?.currency || initialRequestFormState.currency,
-          transaction: parsedData.data.budget.transaction === "yearly"? "Yearly": "Monthly",
+          transaction: parsedData.data.budget.transaction === "yearly" ? "Yearly" : "Monthly",
           duration: parsedData.data.duration !== undefined ? parsedData.data.duration : initialRequestFormState.duration,
           duration_type: parsedData.data.duration_type || initialRequestFormState.duration_type,
           start_date: parsedData.data.start_date || initialRequestFormState.start_date,
@@ -87,16 +137,18 @@ export const useAIParsing = (
           whatsapp_message: parsedData.data.whatsapp_message || whatsappInput,
           reference_id: parsedData.data.reference_id,
           locations: locationObjs.length > 0 ? locationObjs : initialRequestFormState.locations,
-          property_types_required: parsedData.data.property_types_required || parsedData.data.property_type ? [parsedData.data.property_type] : initialRequestFormState.property_types_required,
+          property_types_required: propertyTypesRequired.length > 0 ? propertyTypesRequired : initialRequestFormState.property_types_required,
           options_required: parsedData.data.options_required || initialRequestFormState.options_required,
-          client_user: parsedData.data.client_user || parsedData.data.client?.id || initialRequestFormState.client_user,
           assigned_agent: parsedData.data.assigned_agent || initialRequestFormState.assigned_agent,
           owner: parsedData.data.owner || initialRequestFormState.owner,
-          tag: parsedData.data.tag || initialRequestFormState.tag,
+          tag: tags.length > 0 ? tags : initialRequestFormState.tag,
           is_urgent: parsedData.data.is_urgent !== undefined ? parsedData.data.is_urgent : initialRequestFormState.is_urgent,
         };
 
-        setRequestForm(newRequestForm);
+        setRequestForm({
+          ...requestForm,
+          ...newRequestForm
+        });
         setWhatsappInput(parsedData.data.whatsapp_message || whatsappInput);
         setMessage('Form fields updated successfully from AI data. Please review and save.');
 
@@ -113,13 +165,16 @@ export const useAIParsing = (
           locationObj = locations[0] || null;
         }
 
+        // Match property type from API response to dropdown object
+        const propertyTypeObj = findPropertyType(parsedData.data.property_type);
+        const tagObj = findTag(parsedData.data.tag)
         const newInventoryForm: InventoryForm = {
-          type: parsedData.data.type === "sell" ? "For Sale": "For Rent",
-          property_type: parsedData.data.property_type || initialFormState.property_type,
+          type: parsedData.data.type === "sell" ? "For Sale" : "For Rent",
+          property_type: propertyTypeObj || initialFormState.property_type,
           furnish_type: parsedData.data.furnish_type || initialFormState.furnish_type,
-          price: parsedData.data.budget?.price !== undefined ? parsedData.data.budget.price : initialFormState.price,
+          price: parsedData.data.Price?.price !== undefined ? parsedData.data.Price.price : initialFormState.price,
           currency: parsedData.data.budget?.currency || initialFormState.currency,
-          transaction: parsedData.data.budget.transaction || initialFormState.transaction,
+          transaction: parsedData.data.Price.transaction || initialFormState.transaction,
           duration: parsedData.data.duration !== undefined ? parsedData.data.duration : initialFormState.duration,
           duration_type: parsedData.data.duration_type || initialFormState.duration_type,
           start_date: parsedData.data.start_date || initialFormState.start_date,
@@ -127,8 +182,7 @@ export const useAIParsing = (
           bedrooms: parsedData.data.no_bedroom !== undefined ? parsedData.data.no_bedroom : initialFormState.bedrooms,
           bathrooms: parsedData.data.no_bathroom !== undefined ? parsedData.data.no_bathroom : initialFormState.bathrooms,
           location: locationObj || initialFormState.location,
-          listed_by: parsedData.data.listed_by || initialFormState.listed_by,
-          tag: parsedData.data.tag || initialFormState.tag,
+          tag: tagObj || initialFormState.tag,
           deal_type: parsedData.data.deal_type || initialFormState.deal_type,
           is_urgent: parsedData.data.is_urgent !== undefined ? parsedData.data.is_urgent : initialFormState.is_urgent,
           whatsapp_message: parsedData.data.whatsapp_message || whatsappInput,
@@ -140,7 +194,10 @@ export const useAIParsing = (
           client_email: parsedData.data.client?.email || '',
         };
 
-        setInventoryForm(newInventoryForm);
+        setInventoryForm({
+          ...inventoryForm,
+          ...newInventoryForm
+        });
         setWhatsappInput(newInventoryForm.whatsapp_message);
         setMessage('Form fields updated successfully from AI data. Please review and save.');
       }
@@ -149,7 +206,7 @@ export const useAIParsing = (
       setMessage('Error: Invalid JSON response from AI. Cannot confirm.');
       console.error('JSON Parsing Error:', e);
     }
-  }, [setInventoryForm, setRequestForm, setWhatsappInput]);
+  }, [setInventoryForm, setRequestForm, setWhatsappInput, findPropertyType, findTag]);
 
   const getSingleMessage = useCallback(async (id: string) => {
     try {

@@ -62,12 +62,12 @@ export interface RequestForm {
   deal_type: string;
   reference_id: string;
   locations?: Location[];
-  property_types_required?: PropertyType[];
+  property_types_required?: string[];
   options_required: string[];
   client_user?: User;
   assigned_agent: string;
   owner: string;
-  tag?: Tag[];
+  tag?: string[];
   is_urgent: boolean;
   whatsapp_message: string;
 }
