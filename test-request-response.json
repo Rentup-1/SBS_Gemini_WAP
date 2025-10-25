@@ -1,0 +1,32 @@
+{
+  "data": {
+    "type": "buy",
+    "status": "Pending",
+    "privacy": "Public",
+    "budget": {
+      "price": 500000,
+      "currency": "EGP",
+      "transaction": "One-time"
+    },
+    "duration": 12,
+    "duration_type": "Months",
+    "start_date": "2024-02-01",
+    "end_date": "2024-12-31",
+    "no_bedroom": 3,
+    "no_bathroom": 2,
+    "no_master_bedroom": 1,
+    "furnish_type": "Furnished",
+    "deal_type": "side-by-side",
+    "locations": ["Cairo", "Egypt"],
+    "property_types_required": ["Apartment", "Villa"],
+    "options_required": ["Parking", "Garden"],
+    "assigned_agent": "Agent Smith",
+    "owner": "John Doe",
+    "tag": "Premium",
+    "urgent": true,
+    "whatsapp_message": "Looking for a 3-bedroom apartment in Cairo",
+    "reference_id": "REQ123",
+    "bua": 150,
+    "direct": false
+  }
+}

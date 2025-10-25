@@ -1,0 +1,30 @@
+{
+  "data": {
+    "type": "sell",
+    "property_type": "Apartment",
+    "furnish_type": "Furnished",
+    "Price": {
+      "price": 5000,
+      "currency": "EGP",
+      "transaction": "Monthly"
+    },
+    "no_bedroom": 2,
+    "no_bathroom": 2,
+    "no_master_bedroom": 1,
+    "location": "Cairo, Egypt",
+    "tag": "Premium",
+    "deal_type": "side-by-side",
+    "urgent": false,
+    "whatsapp_message": "Test message",
+    "reference_id": "REF123",
+    "timestamp": "2024-01-01",
+    "image_urls": [],
+    "client": {
+      "name": "John Doe",
+      "phone": "+201234567890",
+      "email": "john@example.com"
+    },
+    "bua": 120,
+    "direct": false
+  }
+}

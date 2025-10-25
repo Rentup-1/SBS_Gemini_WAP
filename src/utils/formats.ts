@@ -20,12 +20,13 @@ export function capitalizeFirst(str: string): string {
 }
 
 export const extractNameAndNumber = (input: string): { name: string; number: string } => {
-  const match = input.match(/^(.+?)\s*\((\d+)\)$/);
+  // Updated regex to handle phone numbers with + and other characters
+  const match = input.match(/^(.+?)\s*\((\+?\d+)\)$/);
   
   if (match) {
     return {
-      name: match[1].trim(),     // "Test"
-      number: match[2].trim()    // "51651"
+      name: match[1].trim(),
+      number: match[2].trim()
     };
   }
   

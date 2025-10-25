@@ -23,7 +23,8 @@ export const initialRequestFormState: RequestForm = {
   deal_type: 'Side-by-Side',
   options_required: [],
   assigned_agent: 'None', owner: 'None',
-  is_urgent: false, is_direct: false, bua: 1, reference_id: "", whatsapp_message: ''
+  is_urgent: false, is_direct: false, bua: 1, reference_id: "", whatsapp_message: '',
+  client_name: '', client_phone: '', client_email: ''
 };
 
 export const COLUMN_METADATA: Record<ColumnKey, ColumnDef> = {

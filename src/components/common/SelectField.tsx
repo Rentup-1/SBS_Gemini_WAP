@@ -17,6 +17,8 @@ interface SelectFieldProps {
   onObjectChange?: (item: SelectableItem | null) => void; // 👈 NEW: for object mode
   name: string;
   options?: string[] | SelectableItem[] | SelectOption[];
+  hasError?: boolean;
+  errorMessage?: string;
 }
 
 export const SelectField: React.FC<SelectFieldProps> = ({ 
@@ -25,7 +27,9 @@ export const SelectField: React.FC<SelectFieldProps> = ({
   onChange,
   onObjectChange,
   name, 
-  options 
+  options,
+  hasError = false,
+  errorMessage
 }) => {
   // Determine if we're in "object mode"
   const isObjectMode = !!onObjectChange;
@@ -84,7 +88,11 @@ export const SelectField: React.FC<SelectFieldProps> = ({
         name={name}
         value={selectedId || ''}
         onChange={handleChange}
-        className="p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-white"
+        className={`p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-white ${
+          hasError 
+            ? 'border-red-500 bg-red-50 focus:ring-red-500 focus:border-red-500' 
+            : 'border-gray-300'
+        }`}
       >
         <option value="">Select...</option>
         {normalizedOptions.map(option => (
@@ -93,6 +101,9 @@ export const SelectField: React.FC<SelectFieldProps> = ({
           </option>
         ))}
       </select>
+      {hasError && errorMessage && (
+        <p className="text-sm text-red-600 mt-1">{errorMessage}</p>
+      )}
     </div>
   );
 };

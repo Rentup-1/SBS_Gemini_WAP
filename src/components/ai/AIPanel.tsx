@@ -191,7 +191,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({
           disabled={!aiResponseRaw.trim() || loading}
           className="mt-4 w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold shadow-md hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          Confirm & Fill Form
+          {loading ? "Loading..." : !aiResponseRaw.trim() ? "No AI Response" : "Confirm & Fill Form"}
         </button>
       </div>
 

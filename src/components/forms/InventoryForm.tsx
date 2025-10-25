@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   type InventoryForm as InventoryFormType,
   type DropdownOptions,
   type User,
+  type UnfilledFields,
 } from "../../interfaces";
 import {
   InputField,
@@ -22,6 +23,7 @@ interface InventoryFormProps {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
   handleObjectChanges: (object: any, fieldName: string) => void;
+  unfilledFields?: UnfilledFields;
 }
 
 export const InventoryForm: React.FC<InventoryFormProps> = ({
@@ -31,14 +33,22 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
   user,
   onChange,
   handleObjectChanges,
+  unfilledFields = {},
 }) => {
-  const updateClientDetails = useCallback(
-    (userData: User) => {
-      const { name, number } = extractNameAndNumber(userData.name);
+  // Effect to set listed_by from user prop on mount
+  useEffect(() => {
+    if (user && !form.listed_by) {
+      handleObjectChanges(user, "listed_by");
+    }
+  }, [user, form.listed_by, handleObjectChanges]);
 
-      // Batch the updates to avoid multiple re-renders
-      handleObjectChanges(userData, "listed_by");
-
+  // Effect to handle user changes and auto-populate client details
+  useEffect(() => {
+    if (form.listed_by) {
+      console.log("form.listed_by", form.listed_by);
+      const { name, number } = extractNameAndNumber(form.listed_by.name);
+      console.log("name", name);
+      console.log("number", number);
       // Create synthetic events for form field updates
       const clientNameEvent = {
         target: {
@@ -58,22 +68,8 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
 
       onChange(clientNameEvent);
       onChange(clientPhoneEvent);
-    },
-    [handleObjectChanges, onChange]
-  );
-
-  // Effect to handle user changes
-  useEffect(() => {
-    if (user) {
-      // Only update if the listed_by user has actually changed
-      const currentListedById = form.listed_by?.id;
-      const newUserId = user.id;
-
-      if (currentListedById !== newUserId) {
-        updateClientDetails(user);
-      }
     }
-  }, [user, form.listed_by, updateClientDetails]);
+  }, [form.listed_by, onChange]);
 
   const renderCoreDetails = () => (
     <div className="space-y-4">
@@ -90,13 +86,14 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
         />
         <SelectField
           label="Property Type"
-          value={form.property_type} // should be PropertyType | null
+          value={form.property_type}
           onObjectChange={(propertyType) => {
-            // Update form with full object
             handleObjectChanges(propertyType, "property_type");
           }}
           name="property_type"
-          options={dropdownOptions.propertyTypes || []} // array of PropertyType[]
+          options={dropdownOptions.propertyTypes || []}
+          hasError={unfilledFields.property_type}
+          errorMessage={unfilledFields.property_type ? "AI could not determine property type" : undefined}
         />
         <SelectField
           label="Furnish Type"
@@ -104,6 +101,8 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           value={form.furnish_type}
           onChange={onChange}
           options={dropdownOptions.furnishTypes || []}
+          hasError={unfilledFields.furnish_type}
+          errorMessage={unfilledFields.furnish_type ? "AI could not determine furnish type" : undefined}
         />
         <InputField
           label="BUA"
@@ -113,6 +112,8 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           onChange={onChange}
           placeholder="0"
           trailingDiv={<span className="text-gray-500">m²</span>}
+          hasError={unfilledFields.bua}
+          errorMessage={unfilledFields.bua ? "AI could not determine BUA" : undefined}
         />
       </div>
     </div>
@@ -242,7 +243,6 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           name="tag"
           value={form.tag}
           onObjectChange={(tag) => {
-            // Update form with full object
             handleObjectChanges(tag, "tag");
           }}
           options={
@@ -251,7 +251,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
                 (category) =>
                   category.name === (form.type === "For Sale" ? "Sell" : "Rent")
               )
-              ?.flatMap((category) => category.tags) || [] // Pass Tag objects
+              ?.flatMap((category) => category.tags) || []
           }
         />
         <SelectField
@@ -337,7 +337,6 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           value={form.listed_by || null}
           onObjectSelect={(user) => {
             handleObjectChanges(user, "listed_by");
-            updateClientDetails(user as User);
           }}
           options={dropdownOptions.listedByUsers || []}
           placeholder="Search or enter user name/ID"
@@ -345,29 +344,31 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
         <InputField
           label="Client Name"
           name="client_name"
-          value={form.client_name}
+          value={form.client_name || ''}
           onChange={onChange}
-          placeholder="Client Name"
+          placeholder="Auto-filled from user"
           readOnly
+          
         />
 
         <InputField
           label="Client Phone"
           name="client_phone"
-          value={form.client_phone}
+          value={form.client_phone || ''}
           onChange={onChange}
-          placeholder="Phone Number"
+          placeholder="Auto-filled from user"
           readOnly
+          
         />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <InputField
+        {/* <InputField
           label="Client Email"
           name="client_email"
           value={form.client_email}
           onChange={onChange}
           placeholder="Email"
-        />
+        /> */}
       </div>
     </div>
   );

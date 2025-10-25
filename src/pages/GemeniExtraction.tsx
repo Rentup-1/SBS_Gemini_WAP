@@ -5,6 +5,7 @@ import {
   type Message,
   type RequestForm,
   type User,
+  type UnfilledFields,
 } from "../interfaces";
 import { useDropdownData } from "../hooks/useDropdownData";
 import { useFormHandlers } from "../hooks/useFormHandlers";
@@ -44,6 +45,7 @@ export default function GemeniExtraction() {
   const [whatsappInput, setWhatsappInput] = useState("");
   const [savedData] = useState<Array<InventoryForm | RequestForm>>([]);
   const [loading, setLoading] = useState(false);
+  const [unfilledFields, setUnfilledFields] = useState<UnfilledFields>({});
   const location: LocationState = useLocation();
 
   const {
@@ -55,7 +57,7 @@ export default function GemeniExtraction() {
     handleConfirmParse,
     getSingleMessage,
     setAiResponseRaw,
-  } = useAIParsing(setForm,form, setRequestForm,requestForm, setWhatsappInput, dropdownOptions, setDropdownOptions);
+  } = useAIParsing(setForm,form, setRequestForm,requestForm, setWhatsappInput, dropdownOptions, setDropdownOptions, setUnfilledFields);
 
   useEffect(() => {
     if (location && location?.state && location?.state?.type) {
@@ -237,6 +239,7 @@ export default function GemeniExtraction() {
           onChange={handleInventoryInputChange}
           handleObjectChanges={handleObjectChanges}
           user={user || null}
+          unfilledFields={unfilledFields}
         />
       ) : (
         <RequestFormComponent
@@ -248,6 +251,7 @@ export default function GemeniExtraction() {
           handleMultiSelectChange={handleMultiSelectChange}
           handleObjectChanges={handleObjectChanges}
           user={user || null}
+          unfilledFields={unfilledFields}
         />
       )}
 
@@ -301,7 +305,7 @@ export default function GemeniExtraction() {
           <div className="text-xs text-gray-600 space-y-1 max-h-40 overflow-y-auto">
             {savedData.map((item, idx) => (
               <div key={idx} className="p-2 bg-white rounded border">
-                {(item as any).id} - {(item as any).location || "No location"}
+                {String('id' in item ? item.id : 'No ID')} - {String(('location' in item ? item.location?.name : (item as RequestForm).locations?.[0]?.name) || "No location")}
               </div>
             ))}
           </div>

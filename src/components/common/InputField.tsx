@@ -9,7 +9,9 @@ export const InputField: React.FC<InputFieldProps> = ({
   name, 
   placeholder = 'Enter value',
   readOnly,
-  trailingDiv
+  trailingDiv,
+  hasError = false,
+  errorMessage
 }) => (
   <div className="flex flex-col space-y-1">
     <label htmlFor={name} className="text-sm font-medium text-gray-700">{label}</label>
@@ -23,7 +25,11 @@ export const InputField: React.FC<InputFieldProps> = ({
         readOnly={readOnly}
         disabled={readOnly}
         placeholder={placeholder}
-        className="p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out w-full"
+        className={`p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out w-full ${
+          hasError 
+            ? 'border-red-500 bg-red-50 focus:ring-red-500 focus:border-red-500' 
+            : 'border-gray-300'
+        }`}
       />
       {trailingDiv && (
         <div className="absolute inset-y-0 right-0 flex items-center pr-3">
@@ -31,5 +37,8 @@ export const InputField: React.FC<InputFieldProps> = ({
         </div>
       )}
     </div>
+    {hasError && errorMessage && (
+      <p className="text-sm text-red-600 mt-1">{errorMessage}</p>
+    )}
   </div>
 );

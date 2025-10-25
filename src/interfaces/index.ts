@@ -43,9 +43,9 @@ export interface InventoryForm {
   is_direct: boolean;
   timestamp: string;
   image_urls: string[];
-  client_name: string;
-  client_phone: string;
-  client_email: string;
+  client_name?: string;
+  client_phone?: string;
+  client_email?: string;
   options_required: string[];
 
 }
@@ -78,6 +78,9 @@ export interface RequestForm {
   is_urgent: boolean;
   is_direct: boolean;
   whatsapp_message: string;
+  client_name?: string;
+  client_phone?: string;
+  client_email?: string;
 }
 
 export interface InputFieldProps {
@@ -88,7 +91,9 @@ export interface InputFieldProps {
   name: string;
   placeholder?: string;
   readOnly?: boolean;
-  trailingDiv?: React.ReactNode; 
+  trailingDiv?: React.ReactNode;
+  hasError?: boolean;
+  errorMessage?: string;
 }
 
 export interface SelectFieldProps {
@@ -97,6 +102,8 @@ export interface SelectFieldProps {
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   name: string;
   options: string[] | Tag[] | PropertyType[];
+  hasError?: boolean;
+  errorMessage?: string;
 }
 
 export interface SearchableInputProps {
@@ -253,4 +260,13 @@ export interface LocationState {
     id: string;
     type: "Inventory" | "Request";
   }
+}
+
+export interface UnfilledFields {
+  [key: string]: boolean;
+}
+
+export interface FormErrorState {
+  unfilledFields: UnfilledFields;
+  hasErrors: boolean;
 }
