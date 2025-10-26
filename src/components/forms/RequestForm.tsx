@@ -23,6 +23,7 @@ interface RequestFormProps {
   dropdownOptions: DropdownOptions;
   requestTransactionOptions: string[];
   user: User | null;
+  messageId: string | null;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
@@ -41,6 +42,7 @@ export const RequestForm: React.FC<RequestFormProps> = ({
   dropdownOptions,
   requestTransactionOptions,
   user,
+  messageId,
   onChange,
   onLocationChange,
   handleMultiSelectChange,
@@ -81,6 +83,17 @@ export const RequestForm: React.FC<RequestFormProps> = ({
     }
   }, [form.client_user, onChange]);
 
+  useEffect(() => {
+    const messageIdEvent = {
+      target: {
+        name: "message_id",
+        type: "text",
+        value: messageId || "",
+      },
+    } as React.ChangeEvent<HTMLInputElement>;
+    onChange(messageIdEvent);
+  }, []);
+
   const renderCoreDetails = () => (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">
@@ -102,7 +115,11 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           onChange={onChange}
           options={dropdownOptions.requestPrivacy || []}
           hasError={unfilledFields.privacy}
-          errorMessage={unfilledFields.privacy ? "AI could not determine privacy setting" : undefined}
+          errorMessage={
+            unfilledFields.privacy
+              ? "AI could not determine privacy setting"
+              : undefined
+          }
         />
       </div>
     </div>
@@ -122,7 +139,9 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           onChange={onChange}
           placeholder="0"
           hasError={unfilledFields.price}
-          errorMessage={unfilledFields.price ? "AI could not determine price" : undefined}
+          errorMessage={
+            unfilledFields.price ? "AI could not determine price" : undefined
+          }
         />
         <SelectField
           label="Currency"
@@ -131,7 +150,11 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           onChange={onChange}
           options={dropdownOptions.currencies || []}
           hasError={unfilledFields.currency}
-          errorMessage={unfilledFields.currency ? "AI could not determine currency" : undefined}
+          errorMessage={
+            unfilledFields.currency
+              ? "AI could not determine currency"
+              : undefined
+          }
         />
         <SelectField
           label="Transaction Type"
@@ -140,7 +163,11 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           onChange={onChange}
           options={requestTransactionOptions}
           hasError={unfilledFields.transaction}
-          errorMessage={unfilledFields.transaction ? "AI could not determine transaction type" : undefined}
+          errorMessage={
+            unfilledFields.transaction
+              ? "AI could not determine transaction type"
+              : undefined
+          }
         />
       </div>
 
@@ -154,7 +181,11 @@ export const RequestForm: React.FC<RequestFormProps> = ({
             onChange={onChange}
             placeholder="12"
             hasError={unfilledFields.duration}
-            errorMessage={unfilledFields.duration ? "AI could not determine duration" : undefined}
+            errorMessage={
+              unfilledFields.duration
+                ? "AI could not determine duration"
+                : undefined
+            }
           />
           <SelectField
             label="Duration Type"
@@ -163,7 +194,11 @@ export const RequestForm: React.FC<RequestFormProps> = ({
             onChange={onChange}
             options={dropdownOptions.durationTypes || []}
             hasError={unfilledFields.duration_type}
-            errorMessage={unfilledFields.duration_type ? "AI could not determine duration type" : undefined}
+            errorMessage={
+              unfilledFields.duration_type
+                ? "AI could not determine duration type"
+                : undefined
+            }
           />
           <InputField
             label="Start Date"
@@ -173,7 +208,11 @@ export const RequestForm: React.FC<RequestFormProps> = ({
             onChange={onChange}
             placeholder="dd/mm/yyyy"
             hasError={unfilledFields.start_date}
-            errorMessage={unfilledFields.start_date ? "AI could not determine start date" : undefined}
+            errorMessage={
+              unfilledFields.start_date
+                ? "AI could not determine start date"
+                : undefined
+            }
           />
           <InputField
             label="End Date"
@@ -183,7 +222,11 @@ export const RequestForm: React.FC<RequestFormProps> = ({
             onChange={onChange}
             placeholder="dd/mm/yyyy"
             hasError={unfilledFields.end_date}
-            errorMessage={unfilledFields.end_date ? "AI could not determine end date" : undefined}
+            errorMessage={
+              unfilledFields.end_date
+                ? "AI could not determine end date"
+                : undefined
+            }
           />
         </div>
       )}
@@ -195,7 +238,11 @@ export const RequestForm: React.FC<RequestFormProps> = ({
         onChange={onChange}
         placeholder="Type the Refrence Id"
         hasError={unfilledFields.reference_id}
-        errorMessage={unfilledFields.reference_id ? "AI could not determine reference ID" : undefined}
+        errorMessage={
+          unfilledFields.reference_id
+            ? "AI could not determine reference ID"
+            : undefined
+        }
       />
       <InputField
         label="WhatsApp Message (Original)"
@@ -221,7 +268,11 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           onChange={onChange}
           placeholder="1"
           hasError={unfilledFields.bedrooms}
-          errorMessage={unfilledFields.bedrooms ? "AI could not determine bedrooms" : undefined}
+          errorMessage={
+            unfilledFields.bedrooms
+              ? "AI could not determine bedrooms"
+              : undefined
+          }
         />
         <InputField
           label="Bathrooms"
@@ -231,7 +282,11 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           onChange={onChange}
           placeholder="1"
           hasError={unfilledFields.bathrooms}
-          errorMessage={unfilledFields.bathrooms ? "AI could not determine bathrooms" : undefined}
+          errorMessage={
+            unfilledFields.bathrooms
+              ? "AI could not determine bathrooms"
+              : undefined
+          }
         />
         <InputField
           label="Master Bedrooms"
@@ -241,7 +296,11 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           onChange={onChange}
           placeholder="1"
           hasError={unfilledFields.no_master_bedroom}
-          errorMessage={unfilledFields.no_master_bedroom ? "AI could not determine master bedrooms" : undefined}
+          errorMessage={
+            unfilledFields.no_master_bedroom
+              ? "AI could not determine master bedrooms"
+              : undefined
+          }
         />
         <SelectField
           label="Furnish Type"
@@ -250,7 +309,11 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           onChange={onChange}
           options={dropdownOptions.furnishTypes || []}
           hasError={unfilledFields.furnish_type}
-          errorMessage={unfilledFields.furnish_type ? "AI could not determine furnish type" : undefined}
+          errorMessage={
+            unfilledFields.furnish_type
+              ? "AI could not determine furnish type"
+              : undefined
+          }
         />
         <SelectField
           label="Deal Type"
@@ -259,7 +322,11 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           onChange={onChange}
           options={dropdownOptions.dealTypes || []}
           hasError={unfilledFields.deal_type}
-          errorMessage={unfilledFields.deal_type ? "AI could not determine deal type" : undefined}
+          errorMessage={
+            unfilledFields.deal_type
+              ? "AI could not determine deal type"
+              : undefined
+          }
         />
       </div>
 
@@ -268,6 +335,12 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           mode="multi"
           selectedLocations={form.locations || []}
           onChange={onLocationChange}
+          hasError={unfilledFields.locations}
+          errorMessage={
+            unfilledFields.locations
+              ? "AI could not determine Location"
+              : undefined
+          }
         />
 
         <MultiSelectField
@@ -277,6 +350,12 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           onChange={handleMultiSelectChange}
           options={dropdownOptions.propertyTypes || []}
           placeholder="Select property types..."
+          hasError={unfilledFields.property_types_required}
+          errorMessage={
+            unfilledFields.property_types_required
+              ? "AI could not determine Property Types"
+              : undefined
+          }
         />
       </div>
       {dropdownOptions.requestOptions &&
@@ -336,26 +415,27 @@ export const RequestForm: React.FC<RequestFormProps> = ({
         <InputField
           label="Client Name"
           name="client_name"
-          value={form.client_name || ''}
+          value={form.client_name || ""}
           onChange={onChange}
           placeholder="Auto-filled from user"
-          readOnly        
+          readOnly
         />
         <InputField
           label="Client Phone"
           name="client_phone"
-          value={form.client_phone || ''}
+          value={form.client_phone || ""}
           onChange={onChange}
           placeholder="Auto-filled from user"
-          readOnly     
+          readOnly
         />
-        {/* <InputField
-          label="Client Email"
-          name="client_email"
-          value={form.client_email}
+        <InputField
+          label="Message ID"
+          name="message_id"
+          value={form.message_id || ""}
           onChange={onChange}
-          placeholder="Email"
-        /> */}
+          placeholder="Message ID"
+          readOnly
+        />
       </div>
 
       <div className="flex items-center pt-2">

@@ -13,6 +13,8 @@ interface MultiSelectFieldProps {
   onChange: (name: string, value: string[]) => void;
   options?: string[] | PropertyType[] | Tag[] | User[] | SelectOption[];
   placeholder?: string;
+  hasError?: boolean;
+  errorMessage?: string;
 }
 
 export const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
@@ -21,7 +23,9 @@ export const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
   value = [],
   onChange,
   options,
-  placeholder = 'Select options...'
+  placeholder = 'Select options...',
+  hasError = false,
+  errorMessage
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,7 +80,11 @@ export const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       <label className="text-sm font-medium text-gray-700">{label}</label>
       
       {/* Selected items display */}
-      <div className="flex flex-wrap gap-2 min-h-[2.5rem] p-2 border border-gray-300 rounded-md bg-white">
+      <div className={`flex flex-wrap gap-2 min-h-[2.5rem] p-2 border rounded-md transition duration-150 ease-in-out ${
+        hasError 
+          ? 'border-red-500 bg-red-50' 
+          : 'border-gray-300 bg-white'
+      }`}>
         {selectedOptions.length > 0 ? (
           selectedOptions.map(option => (
             <span
@@ -107,7 +115,11 @@ export const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
           onFocus={() => setIsOpen(true)}
           onBlur={() => setTimeout(() => setIsOpen(false), 200)}
           placeholder="Search options..."
-          className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
+          className={`w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out ${
+            hasError 
+              ? 'border-red-500 bg-red-50 focus:ring-red-500 focus:border-red-500' 
+              : 'border-gray-300'
+          }`}
         />
 
         {/* Options dropdown */}
@@ -140,6 +152,11 @@ export const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
           </div>
         )}
       </div>
+
+      {/* Error Message */}
+      {hasError && errorMessage && (
+        <p className="text-sm text-red-600">{errorMessage}</p>
+      )}
     </div>
   );
 };

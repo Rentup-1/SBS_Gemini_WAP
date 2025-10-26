@@ -1,14 +1,7 @@
 
 import React from 'react';
 import { AlertCircle, X } from 'lucide-react';
-
-interface AlertPopupProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title?: string;
-  message: string;
-  type?: 'error' | 'warning' | 'info' | 'success';
-}
+import type { AlertPopupProps } from '../../interfaces';
 
 export const AlertPopup: React.FC<AlertPopupProps> = ({ 
   isOpen, 

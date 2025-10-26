@@ -47,11 +47,11 @@ export interface InventoryForm {
   client_phone?: string;
   client_email?: string;
   options_required: string[];
-
+  message_id?: string;
 }
 
 export interface RequestForm {
-  type:  "Buy" | "Rent";
+  type: "Buy" | "Rent";
   status: string;
   privacy: string;
   price: number;
@@ -81,6 +81,7 @@ export interface RequestForm {
   client_name?: string;
   client_phone?: string;
   client_email?: string;
+  message_id?: string;
 }
 
 export interface InputFieldProps {
@@ -109,7 +110,7 @@ export interface SelectFieldProps {
 export interface SearchableInputProps {
   label: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   name: string;
   options: string[] | User[];
   placeholder?: string;
@@ -130,8 +131,8 @@ export interface Message {
   status: 'Not Listed' | 'Listed';
 }
 
-export type FlexibleColumnKey = 
-   'id' | 'contactName' | 'message' | 'sentAt' | 'type' | 'userId' ;
+export type FlexibleColumnKey =
+  'id' | 'contactName' | 'message' | 'sentAt' | 'type' | 'userId';
 
 export type ColumnKey = FlexibleColumnKey | 'actions';
 
@@ -269,4 +270,12 @@ export interface UnfilledFields {
 export interface FormErrorState {
   unfilledFields: UnfilledFields;
   hasErrors: boolean;
+}
+
+export interface AlertPopupProps {
+  isOpen: boolean;
+  onClose?: () => void;
+  title?: string;
+  message: string;
+  type?: 'error' | 'warning' | 'info' | 'success';
 }

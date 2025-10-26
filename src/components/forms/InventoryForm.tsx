@@ -19,6 +19,7 @@ interface InventoryFormProps {
   dropdownOptions: DropdownOptions;
   inventoryTransactionOptions: string[];
   user: User | null;
+  messageId: string | null;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
@@ -31,6 +32,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
   dropdownOptions,
   inventoryTransactionOptions,
   user,
+  messageId,
   onChange,
   handleObjectChanges,
   unfilledFields = {},
@@ -71,6 +73,18 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
     }
   }, [form.listed_by, onChange]);
 
+  useEffect(() => {
+    console.log(messageId)
+    const messageIdEvent = {
+      target: {
+        name: "message_id",
+        type: "text",
+        value: messageId || "",
+      },
+    } as React.ChangeEvent<HTMLInputElement>;
+    onChange(messageIdEvent);
+  }, []);
+
   const renderCoreDetails = () => (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">
@@ -93,7 +107,11 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           name="property_type"
           options={dropdownOptions.propertyTypes || []}
           hasError={unfilledFields.property_type}
-          errorMessage={unfilledFields.property_type ? "AI could not determine property type" : undefined}
+          errorMessage={
+            unfilledFields.property_type
+              ? "AI could not determine property type"
+              : undefined
+          }
         />
         <SelectField
           label="Furnish Type"
@@ -102,7 +120,11 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           onChange={onChange}
           options={dropdownOptions.furnishTypes || []}
           hasError={unfilledFields.furnish_type}
-          errorMessage={unfilledFields.furnish_type ? "AI could not determine furnish type" : undefined}
+          errorMessage={
+            unfilledFields.furnish_type
+              ? "AI could not determine furnish type"
+              : undefined
+          }
         />
         <InputField
           label="BUA"
@@ -113,7 +135,9 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           placeholder="0"
           trailingDiv={<span className="text-gray-500">m²</span>}
           hasError={unfilledFields.bua}
-          errorMessage={unfilledFields.bua ? "AI could not determine BUA" : undefined}
+          errorMessage={
+            unfilledFields.bua ? "AI could not determine BUA" : undefined
+          }
         />
       </div>
     </div>
@@ -132,6 +156,10 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           value={form.price}
           onChange={onChange}
           placeholder="0"
+          hasError={unfilledFields.price}
+          errorMessage={
+            unfilledFields.price ? "AI could not determine price" : undefined
+          }
         />
         <SelectField
           label="Currency"
@@ -139,6 +167,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           value={form.currency}
           onChange={onChange}
           options={dropdownOptions.currencies || []}
+          hasError={unfilledFields.currency}
+          errorMessage={
+            unfilledFields.currency
+              ? "AI could not determine currency"
+              : undefined
+          }
         />
         <SelectField
           label="Transaction Type"
@@ -146,6 +180,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           value={form.transaction}
           onChange={onChange}
           options={inventoryTransactionOptions}
+          hasError={unfilledFields.transaction}
+          errorMessage={
+            unfilledFields.transaction
+              ? "AI could not determine transaction type"
+              : undefined
+          }
         />
       </div>
 
@@ -158,6 +198,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
             value={form.duration}
             onChange={onChange}
             placeholder="12"
+            hasError={unfilledFields.duration}
+            errorMessage={
+              unfilledFields.duration
+                ? "AI could not determine duration"
+                : undefined
+            }
           />
           <SelectField
             label="Duration Type"
@@ -165,6 +211,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
             value={form.duration_type}
             onChange={onChange}
             options={dropdownOptions.durationTypes || []}
+            hasError={unfilledFields.duration_type}
+            errorMessage={
+              unfilledFields.duration_type
+                ? "AI could not determine duration type"
+                : undefined
+            }
           />
           <InputField
             label="Start Date"
@@ -173,6 +225,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
             value={form.start_date}
             onChange={onChange}
             placeholder="dd/mm/yyyy"
+            hasError={unfilledFields.start_date}
+            errorMessage={
+              unfilledFields.start_date
+                ? "AI could not determine start date"
+                : undefined
+            }
           />
           <InputField
             label="End Date"
@@ -181,6 +239,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
             value={form.end_date}
             onChange={onChange}
             placeholder="dd/mm/yyyy"
+            hasError={unfilledFields.end_date}
+            errorMessage={
+              unfilledFields.end_date
+                ? "AI could not determine end date"
+                : undefined
+            }
           />
         </div>
       )}
@@ -200,6 +264,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           value={form.bedrooms}
           onChange={onChange}
           placeholder="1"
+          hasError={unfilledFields.bedrooms}
+          errorMessage={
+            unfilledFields.bedrooms
+              ? "AI could not determine bedrooms"
+              : undefined
+          }
         />
         <InputField
           label="Bathrooms"
@@ -208,6 +278,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           value={form.bathrooms}
           onChange={onChange}
           placeholder="1"
+          hasError={unfilledFields.bathrooms}
+          errorMessage={
+            unfilledFields.bathrooms
+              ? "AI could not determine bathrooms"
+              : undefined
+          }
         />
         <InputField
           label="Master Bedrooms"
@@ -216,6 +292,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           value={form.no_master_bedroom}
           onChange={onChange}
           placeholder="1"
+          hasError={unfilledFields.no_master_bedroom}
+          errorMessage={
+            unfilledFields.no_master_bedroom
+              ? "AI could not determine master bedrooms"
+              : undefined
+          }
         />
       </div>
       <div className="col-span-4 mt-4">
@@ -227,6 +309,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           value={form?.location ?? undefined}
           onChange={(location) => handleObjectChanges(location, "location")}
           placeholder="Start typing to search for a location..."
+          hasError={unfilledFields.location}
+          errorMessage={
+            unfilledFields.location
+              ? "AI could not determine Location"
+              : undefined
+          }
         />
       </div>
     </div>
@@ -253,6 +341,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
               )
               ?.flatMap((category) => category.tags) || []
           }
+          hasError={unfilledFields.tag}
+          errorMessage={
+            unfilledFields.tag
+              ? "AI could not determine Tag"
+              : undefined
+          }
         />
         <SelectField
           label="Deal Type"
@@ -260,6 +354,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           value={form.deal_type}
           onChange={onChange}
           options={dropdownOptions.dealTypes || []}
+          hasError={unfilledFields.deal_type}
+          errorMessage={
+            unfilledFields.deal_type
+              ? "AI could not determine deal type"
+              : undefined
+          }
         />
       </div>
       {dropdownOptions.requestOptions &&
@@ -281,6 +381,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
         value={form.reference_id}
         onChange={onChange}
         placeholder="Type the Refrence Id"
+        hasError={unfilledFields.reference_id}
+        errorMessage={
+          unfilledFields.reference_id
+            ? "AI could not determine reference ID"
+            : undefined
+        }
       />
       <InputField
         label="WhatsApp Message (Original)"
@@ -344,31 +450,30 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
         <InputField
           label="Client Name"
           name="client_name"
-          value={form.client_name || ''}
+          value={form.client_name || ""}
           onChange={onChange}
           placeholder="Auto-filled from user"
           readOnly
-          
         />
 
         <InputField
           label="Client Phone"
           name="client_phone"
-          value={form.client_phone || ''}
+          value={form.client_phone || ""}
           onChange={onChange}
           placeholder="Auto-filled from user"
           readOnly
-          
         />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* <InputField
-          label="Client Email"
-          name="client_email"
-          value={form.client_email}
+        <InputField
+          label="Message ID"
+          name="message_id"
+          value={form.message_id || ''}
           onChange={onChange}
-          placeholder="Email"
-        /> */}
+          placeholder="Message ID"
+          readOnly
+        />
       </div>
     </div>
   );

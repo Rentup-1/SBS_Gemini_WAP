@@ -6,6 +6,7 @@ import {
   type RequestForm,
   type User,
   type UnfilledFields,
+  type AlertPopupProps,
 } from "../interfaces";
 import { useDropdownData } from "../hooks/useDropdownData";
 import { useFormHandlers } from "../hooks/useFormHandlers";
@@ -17,17 +18,20 @@ import { useLocation } from "react-router-dom";
 import { AlertPopup } from "../components/common";
 
 export default function GemeniExtraction() {
-  const [alertState, setAlertState] = useState({
+  const [alertState, setAlertState] = useState<AlertPopupProps>({
     isOpen: false,
     title: "",
     message: "",
+    type: "error",
   });
   const [phoneStatus, setPhoneStatus] = useState<"Inventory" | "Request">(
     "Inventory"
   );
   const [response, setResonse] = useState<Message>();
   const [user, setUser] = useState<User>();
-  const { dropdownOptions, setDropdownOptions } = useDropdownData({ formType: phoneStatus });
+  const { dropdownOptions, setDropdownOptions } = useDropdownData({
+    formType: phoneStatus,
+  });
   const {
     form,
     setForm,
@@ -57,7 +61,16 @@ export default function GemeniExtraction() {
     handleConfirmParse,
     getSingleMessage,
     setAiResponseRaw,
-  } = useAIParsing(setForm,form, setRequestForm,requestForm, setWhatsappInput, dropdownOptions, setDropdownOptions, setUnfilledFields);
+  } = useAIParsing(
+    setForm,
+    form,
+    setRequestForm,
+    requestForm,
+    setWhatsappInput,
+    dropdownOptions,
+    setDropdownOptions,
+    setUnfilledFields
+  );
 
   useEffect(() => {
     if (location && location?.state && location?.state?.type) {
@@ -69,14 +82,14 @@ export default function GemeniExtraction() {
         setResonse(res);
         setWhatsappInput(res?.message || "");
         setUser({
-          id : Number(res?.userId.slice(1) || "0")|| 0,
-          name: `${res?.contactName} (${res?.contactPhone})`
-        })
+          id: Number(res?.userId.slice(1) || "0") || 0,
+          name: `${res?.contactName} (${res?.contactPhone})`,
+        });
       }
     };
     fetchSingleMessage();
   }, [location, getSingleMessage]);
-  
+
   function formatDateToDDMMYYYY(isoString: string): string {
     const date = new Date(isoString);
     const day = String(date.getDate()).padStart(2, "0");
@@ -132,8 +145,11 @@ export default function GemeniExtraction() {
           ? (data as InventoryForm).listed_by?.id
           : (data as RequestForm).client_user?.id,
         urgent: data.is_urgent,
-        privacy: isInventory ? "public" : (data as RequestForm).privacy.toLowerCase(),
-        tag_id: (data as InventoryForm).tag?.id ?? (data as RequestForm).tag?.id,
+        privacy: isInventory
+          ? "public"
+          : (data as RequestForm).privacy.toLowerCase(),
+        tag_id:
+          (data as InventoryForm).tag?.id ?? (data as RequestForm).tag?.id,
         furnish_type_id:
           dropdownOptions.furnishTypes && data.furnish_type
             ? dropdownOptions.furnishTypes.indexOf(data.furnish_type) + 1
@@ -187,18 +203,23 @@ export default function GemeniExtraction() {
             )
             .join("\n");
           errorMessage = `Validation errors:\n${errorList}`;
-          // console.log(errorMessage);
           setAlertState({
             isOpen: true,
             title: "Creation Error",
             message: errorMessage,
+            type: "error",
           });
           throw new Error(`Request failed: ${errorMessage}`);
         }
       }
 
       console.log("✅ Success:", result);
-
+      setAlertState({
+        isOpen: true,
+        title: "Creation Success",
+        message: result,
+        type: "success",
+      });
       setMessage(`${phoneStatus} listing saved successfully!`);
     } catch (error) {
       console.error("❌ Error saving data:", error);
@@ -239,6 +260,7 @@ export default function GemeniExtraction() {
           onChange={handleInventoryInputChange}
           handleObjectChanges={handleObjectChanges}
           user={user || null}
+          messageId={location?.state?.id || null}
           unfilledFields={unfilledFields}
         />
       ) : (
@@ -251,6 +273,7 @@ export default function GemeniExtraction() {
           handleMultiSelectChange={handleMultiSelectChange}
           handleObjectChanges={handleObjectChanges}
           user={user || null}
+          messageId={location?.state?.id || null}
           unfilledFields={unfilledFields}
         />
       )}
@@ -305,7 +328,13 @@ export default function GemeniExtraction() {
           <div className="text-xs text-gray-600 space-y-1 max-h-40 overflow-y-auto">
             {savedData.map((item, idx) => (
               <div key={idx} className="p-2 bg-white rounded border">
-                {String('id' in item ? item.id : 'No ID')} - {String(('location' in item ? item.location?.name : (item as RequestForm).locations?.[0]?.name) || "No location")}
+                {String("id" in item ? item.id : "No ID")} -{" "}
+                {String(
+                  ("location" in item
+                    ? item.location?.name
+                    : (item as RequestForm).locations?.[0]?.name) ||
+                    "No location"
+                )}
               </div>
             ))}
           </div>
@@ -350,7 +379,7 @@ export default function GemeniExtraction() {
             }
             title={alertState.title}
             message={alertState.message}
-            type="error"
+            type={alertState.type}
           />
         </div>
       </div>

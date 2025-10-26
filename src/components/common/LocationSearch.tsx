@@ -5,9 +5,11 @@ import type { Location } from '../../interfaces';
 // Single select props
 interface SingleSelectProps {
   mode: 'single';
-  value?: Location ;
+  value?: Location;
   onChange: (location: Location | null) => void;
   placeholder?: string;
+  hasError?: boolean;
+  errorMessage?: string;
 }
 
 // Multi select props
@@ -16,12 +18,19 @@ interface MultiSelectProps {
   selectedLocations: Location[] | null;
   onChange: (locations: Location[]) => void;
   placeholder?: string;
+  hasError?: boolean;
+  errorMessage?: string;
 }
 
 type LocationSearchProps = SingleSelectProps | MultiSelectProps;
 
 export const LocationSearch: React.FC<LocationSearchProps> = (props) => {
-  const { mode, placeholder = "Search locations... (min 2 characters)" } = props;
+  const { 
+    mode, 
+    placeholder = "Search locations... (min 2 characters)",
+    hasError = false,
+    errorMessage
+  } = props;
   
   const [searchText, setSearchText] = useState(
     mode === 'single' ? props.value?.name || '' : ''
@@ -98,11 +107,6 @@ export const LocationSearch: React.FC<LocationSearchProps> = (props) => {
       }
       
       props.onChange(newSelected);
-      
-      // ✅ FIXED: Keep search text for continuous selection
-      // Only clear if you want to allow single selection at a time
-      // For multi-selection, it's better to keep the search text
-      // so users can select multiple locations without re-typing
     }
   };
 
@@ -168,7 +172,11 @@ export const LocationSearch: React.FC<LocationSearchProps> = (props) => {
           onFocus={() => searchText?.length >= 2 && setShowDropdown(true)}
           onBlur={handleBlur}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition"
+          className={`w-full pl-10 pr-10 py-2 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out ${
+            hasError 
+              ? 'border-red-500 bg-red-50 focus:ring-red-500 focus:border-red-500' 
+              : 'border-gray-300'
+          }`}
         />
         {searchText && (
           <button
@@ -184,6 +192,11 @@ export const LocationSearch: React.FC<LocationSearchProps> = (props) => {
           </div>
         )}
       </div>
+
+      {/* Error Message */}
+      {hasError && errorMessage && (
+        <p className="text-sm text-red-600 mt-1">{errorMessage}</p>
+      )}
 
       {/* Dropdown Results */}
       {showDropdown && locations.length > 0 && (
