@@ -371,7 +371,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           selectedValues={form.options_required || []}
           onChange={onChange}
           maxHeight="max-h-40"
-          selectAllByDefault
+          selectAllByDefault={false}
         />
       ) : null}
       <InputField

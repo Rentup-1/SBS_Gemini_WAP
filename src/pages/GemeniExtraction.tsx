@@ -138,6 +138,7 @@ export default function GemeniExtraction() {
             }),
         no_bedroom: data.bedrooms,
         no_bathroom: data.bathrooms,
+        no_master_room: data.no_master_bedroom,
         user_id: isInventory
           ? (data as InventoryForm).listed_by?.id
           : (data as RequestForm).client_user?.id,
@@ -173,8 +174,12 @@ export default function GemeniExtraction() {
             type: "months",
           },
         },
+        bua: data.bua,
+        options: data.options_required,
+        source: "Admin",
+        direct: data.is_direct
       };
-      console.log(submissionData);
+      // console.log(submissionData);
       const endpoint = isInventory
         ? "https://sbsapi.rentup.com.eg/api/migrate/messages/inventory"
         : "https://sbsapi.rentup.com.eg/api/migrate/messages/request";
@@ -217,7 +222,7 @@ export default function GemeniExtraction() {
       setAlertState({
         isOpen: true,
         title: "Creation Success",
-        message: result,
+        message: result.msg,
         type: "success",
       });
       setMessage(`${phoneStatus} listing saved successfully!`);

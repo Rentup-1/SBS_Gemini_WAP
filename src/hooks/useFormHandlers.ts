@@ -29,7 +29,8 @@ export const useFormHandlers = (dropdownOptions: DropdownOptions) => {
   const handleInventoryInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-
+    console.log(name, checked)
+    
     if (name === 'type') {
       const properType = value === 'For Rent' ? 'For Rent' :
         value === 'For Sale' ? 'For Sale' :
@@ -46,9 +47,34 @@ export const useFormHandlers = (dropdownOptions: DropdownOptions) => {
       return;
     }
 
+    if (type === 'checkbox') {
+      // Handle checkbox list fields (like property_types, options, etc.)
+      if ( name === 'options_required') {
+        const listName = name as 'options_required';
+        const optionValue = (e.target as HTMLInputElement).value;
+
+        setForm(prev => {
+          const currentList = prev[listName];
+          if (checked) {
+            return { ...prev, [listName]: [...(currentList || []), optionValue] };
+          } else {
+            return { ...prev, [listName]: (currentList || []).filter(item => item !== optionValue) };
+          }
+        });
+        return;
+      }
+
+      // Handle single boolean checkboxes
+      setForm(prev => ({
+        ...prev,
+        [name]: checked
+      }));
+      return;
+    }
+
     setForm(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     }));
   }, []);
 

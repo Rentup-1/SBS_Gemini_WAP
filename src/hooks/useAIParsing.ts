@@ -121,10 +121,10 @@ export const useAIParsing = (
           const matchedType = findPropertyType(parsedData.data.property_type);
           if (matchedType) propertyTypesRequired.push(String(matchedType.id));
         }
-
+      const requestOptions = parsedData.data.options; 
        setDropdownOptions({
         ...dropdownOptions,
-        requestOptions: parsedData.data.options
+        requestOptions: requestOptions
        })
         const tagObj = findTag(parsedData.data.tag)
         const newRequestForm: RequestForm = {
@@ -147,13 +147,13 @@ export const useAIParsing = (
           reference_id: parsedData.data.reference_id,
           locations: locationObjs.length > 0 ? locationObjs : initialRequestFormState.locations,
           property_types_required: propertyTypesRequired.length > 0 ? propertyTypesRequired : initialRequestFormState.property_types_required,
-          options_required: parsedData.data.options_required || initialRequestFormState.options_required,
+          options_required: requestOptions || initialRequestFormState.options_required,
           assigned_agent: parsedData.data.assigned_agent || initialRequestFormState.assigned_agent,
           owner: parsedData.data.owner || initialRequestFormState.owner,
           tag: tagObj || initialRequestFormState.tag,
           is_urgent: parsedData.data.urgent !== undefined ? parsedData.data.urgent : initialRequestFormState.is_urgent,
           bua: parsedData.data.bua || initialRequestFormState.bua,
-          is_direct: parsedData.data.direct || initialRequestFormState.is_direct
+          is_direct: parsedData.data.direct && parsedData.data.direct != "Not provided" ? parsedData.data.direct : initialRequestFormState.is_direct
         };
 
         // Track unfilled fields for Request form
@@ -201,9 +201,10 @@ export const useAIParsing = (
           const locations = await fetchLocation(normalizeLocation);
           locationObj = locations[0] || null;
         }
+       const requestOptions = parsedData.data.more_options && parsedData.data.more_options !== "Not provided"? parsedData.data.more_options?.split(","): []
         setDropdownOptions({
         ...dropdownOptions,
-        requestOptions: parsedData.data.more_options && parsedData.data.more_options !== "Not provided"? parsedData.data.more_options?.split(","): []
+        requestOptions: requestOptions
        })
         // Match property type from API response to dropdown object
         const propertyTypeObj = findPropertyType(parsedData.data.property_type);
@@ -234,8 +235,8 @@ export const useAIParsing = (
           // client_phone: parsedData.data.client?.phone || '',
           // client_email: parsedData.data.client?.email || '',
           bua: parsedData.data.bua || initialFormState.bua,
-          is_direct: parsedData.data.direct || initialFormState.is_direct,
-          options_required: []
+          is_direct: parsedData.data.direct && parsedData.data.direct != "Not provided" ? parsedData.data.direct : initialFormState.is_direct,
+          options_required: requestOptions
         };
 
         // Track unfilled fields for Inventory form
