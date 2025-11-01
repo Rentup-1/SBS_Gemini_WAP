@@ -179,7 +179,7 @@ export default function GemeniExtraction() {
               inventory_options: data.options_required
             }
           : {
-              options: data.options_required
+              request_options: data.options_required
             }),
         source: data.source,
         direct: data.is_direct,
