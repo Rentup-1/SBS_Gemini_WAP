@@ -120,7 +120,7 @@ export const SearchableInput: React.FC<SearchableInputProps> = ({
         className="p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
       />
       {isFocused && filteredOptions.length > 0 && (
-        <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-10 shadow-lg max-h-48 overflow-y-auto">
+        <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-md top-full mt-1 shadow-lg max-h-48 overflow-y-auto">
           {filteredOptions.map(option => (
             <div
               key={option.value}

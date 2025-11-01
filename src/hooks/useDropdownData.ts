@@ -18,6 +18,7 @@ const HARDCODED_DATA = {
   requestPrivacy: ['Public', 'Private'],
   assignmentUsers: ['None', 'Agent A', 'Agent B', 'Owner C'],
   requestOptions: [],
+  sourceOptions: ["WAP", "APP", "ADMIN"]
 };
 export type FormType = 'Inventory' | 'Request';
 

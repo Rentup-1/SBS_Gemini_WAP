@@ -16,6 +16,7 @@ export interface DropdownOptions {
   requestPrivacy?: string[];
   assignmentUsers?: string[];
   requestOptions?: string[];
+  sourceOptions?: string[];
 }
 
 export interface InventoryForm {
@@ -23,6 +24,7 @@ export interface InventoryForm {
   property_type?: PropertyType;
   furnish_type: string;
   bua: number;
+  privacy: string;
   price: number;
   currency: string;
   transaction: string;
@@ -48,6 +50,7 @@ export interface InventoryForm {
   client_email?: string;
   options_required: string[];
   message_id?: string;
+  source: string;
 }
 
 export interface RequestForm {
@@ -82,6 +85,8 @@ export interface RequestForm {
   client_phone?: string;
   client_email?: string;
   message_id?: string;
+  source: string;
+
 }
 
 export interface InputFieldProps {

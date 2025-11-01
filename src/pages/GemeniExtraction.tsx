@@ -146,9 +146,7 @@ export default function GemeniExtraction() {
           ? (data as InventoryForm).listed_by?.id
           : (data as RequestForm).client_user?.id,
         urgent: data.is_urgent,
-        privacy: isInventory
-          ? "public"
-          : (data as RequestForm).privacy.toLowerCase(),
+        privacy: data.privacy.toLowerCase(),
         tag_id:
           (data as InventoryForm).tag?.id ?? (data as RequestForm).tag?.id,
         furnish_type_id:
@@ -174,10 +172,17 @@ export default function GemeniExtraction() {
             type: "months",
           },
         },
+        whatsapp_msg: data.whatsapp_message,
         bua: data.bua,
-        options: data.options_required,
-        source: "Admin",
-        direct: data.is_direct
+        ...(isInventory
+          ? {
+              inventory_options: data.options_required
+            }
+          : {
+              options: data.options_required
+            }),
+        source: data.source,
+        direct: data.is_direct,
       };
       // console.log(submissionData);
       const endpoint = isInventory

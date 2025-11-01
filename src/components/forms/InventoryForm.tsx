@@ -74,7 +74,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
   }, [form.listed_by, onChange]);
 
   useEffect(() => {
-    console.log(messageId)
+    console.log(messageId);
     const messageIdEvent = {
       target: {
         name: "message_id",
@@ -87,6 +87,13 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
 
   const renderCoreDetails = () => (
     <div className="space-y-4">
+      <SelectField
+          label="Source"
+          name="source"
+          value={form.source}
+          onChange={onChange}
+          options={dropdownOptions.sourceOptions || []}
+        />
       <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">
         Core Details
       </h3>
@@ -97,6 +104,39 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           value={form.type}
           onChange={onChange}
           options={dropdownOptions.types || []}
+        />
+        <SelectField
+          label="Tag"
+          name="tag"
+          value={form.tag}
+          onObjectChange={(tag) => {
+            handleObjectChanges(tag, "tag");
+          }}
+          options={
+            dropdownOptions.tags
+              ?.filter(
+                (category) =>
+                  category.name === (form.type === "For Sale" ? "Sell" : "Rent")
+              )
+              ?.flatMap((category) => category.tags) || []
+          }
+          hasError={unfilledFields.tag}
+          errorMessage={
+            unfilledFields.tag ? "AI could not determine Tag" : undefined
+          }
+        />
+        <SelectField
+          label="Privacy"
+          name="privacy"
+          value={form.privacy}
+          onChange={onChange}
+          options={dropdownOptions.requestPrivacy || []}
+          hasError={unfilledFields.privacy}
+          errorMessage={
+            unfilledFields.privacy
+              ? "AI could not determine privacy setting"
+              : undefined
+          }
         />
         <SelectField
           label="Property Type"
@@ -327,28 +367,6 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <SelectField
-          label="Tag"
-          name="tag"
-          value={form.tag}
-          onObjectChange={(tag) => {
-            handleObjectChanges(tag, "tag");
-          }}
-          options={
-            dropdownOptions.tags
-              ?.filter(
-                (category) =>
-                  category.name === (form.type === "For Sale" ? "Sell" : "Rent")
-              )
-              ?.flatMap((category) => category.tags) || []
-          }
-          hasError={unfilledFields.tag}
-          errorMessage={
-            unfilledFields.tag
-              ? "AI could not determine Tag"
-              : undefined
-          }
-        />
-        <SelectField
           label="Deal Type"
           name="deal_type"
           value={form.deal_type}
@@ -469,7 +487,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
         <InputField
           label="Message ID"
           name="message_id"
-          value={form.message_id || ''}
+          value={form.message_id || ""}
           onChange={onChange}
           placeholder="Message ID"
           readOnly

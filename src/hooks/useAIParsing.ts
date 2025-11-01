@@ -153,7 +153,8 @@ export const useAIParsing = (
           tag: tagObj || initialRequestFormState.tag,
           is_urgent: parsedData.data.urgent !== undefined ? parsedData.data.urgent : initialRequestFormState.is_urgent,
           bua: parsedData.data.bua || initialRequestFormState.bua,
-          is_direct: parsedData.data.direct && parsedData.data.direct != "Not provided" ? parsedData.data.direct : initialRequestFormState.is_direct
+          is_direct: parsedData.data.direct && parsedData.data.direct != "Not provided" ? parsedData.data.direct : initialRequestFormState.is_direct,
+          source: initialRequestFormState.source
         };
 
         // Track unfilled fields for Request form
@@ -236,7 +237,9 @@ export const useAIParsing = (
           // client_email: parsedData.data.client?.email || '',
           bua: parsedData.data.bua || initialFormState.bua,
           is_direct: parsedData.data.direct && parsedData.data.direct != "Not provided" ? parsedData.data.direct : initialFormState.is_direct,
-          options_required: requestOptions
+          options_required: requestOptions,
+          source: initialFormState.source,
+          privacy: initialFormState.privacy
         };
 
         // Track unfilled fields for Inventory form

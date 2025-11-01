@@ -96,6 +96,13 @@ export const RequestForm: React.FC<RequestFormProps> = ({
 
   const renderCoreDetails = () => (
     <div className="space-y-4">
+      <SelectField
+        label="Source"
+        name="source"
+        value={form.source}
+        onChange={onChange}
+        options={dropdownOptions.sourceOptions || []}
+      />
       <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">
         Core Details
       </h3>
@@ -107,7 +114,24 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           onChange={onChange}
           options={["Rent", "Buy"]}
         />
-
+        <SelectField
+          label="Tag"
+          name="tag"
+          value={form.tag}
+          onObjectChange={(tag) => {
+            if (tag) {
+              handleObjectChanges(tag, "tag", "Request");
+            }
+          }}
+          options={
+            dropdownOptions.tags
+              ?.filter(
+                (category) =>
+                  category.name === (form.type === "Buy" ? "Buy" : "Rent")
+              )
+              ?.flatMap((category) => category.tags) || []
+          }
+        />
         <SelectField
           label="Privacy"
           name="privacy"
@@ -119,6 +143,46 @@ export const RequestForm: React.FC<RequestFormProps> = ({
             unfilledFields.privacy
               ? "AI could not determine privacy setting"
               : undefined
+          }
+        />
+        <MultiSelectField
+          label="Property Types"
+          name="property_types_required"
+          value={form.property_types_required}
+          onChange={handleMultiSelectChange}
+          options={dropdownOptions.propertyTypes || []}
+          placeholder="Select property types..."
+          hasError={unfilledFields.property_types_required}
+          errorMessage={
+            unfilledFields.property_types_required
+              ? "AI could not determine Property Types"
+              : undefined
+          }
+        />
+        <SelectField
+          label="Furnish Type"
+          name="furnish_type"
+          value={form.furnish_type}
+          onChange={onChange}
+          options={dropdownOptions.furnishTypes || []}
+          hasError={unfilledFields.furnish_type}
+          errorMessage={
+            unfilledFields.furnish_type
+              ? "AI could not determine furnish type"
+              : undefined
+          }
+        />
+        <InputField
+          label="BUA"
+          name="bua"
+          type="number"
+          value={form.bua}
+          onChange={onChange}
+          placeholder="0"
+          trailingDiv={<span className="text-gray-500">m²</span>}
+          hasError={unfilledFields.bua}
+          errorMessage={
+            unfilledFields.bua ? "AI could not determine BUA" : undefined
           }
         />
       </div>
@@ -302,19 +366,7 @@ export const RequestForm: React.FC<RequestFormProps> = ({
               : undefined
           }
         />
-        <SelectField
-          label="Furnish Type"
-          name="furnish_type"
-          value={form.furnish_type}
-          onChange={onChange}
-          options={dropdownOptions.furnishTypes || []}
-          hasError={unfilledFields.furnish_type}
-          errorMessage={
-            unfilledFields.furnish_type
-              ? "AI could not determine furnish type"
-              : undefined
-          }
-        />
+
         <SelectField
           label="Deal Type"
           name="deal_type"
@@ -339,21 +391,6 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           errorMessage={
             unfilledFields.locations
               ? "AI could not determine Location"
-              : undefined
-          }
-        />
-
-        <MultiSelectField
-          label="Property Types"
-          name="property_types_required"
-          value={form.property_types_required}
-          onChange={handleMultiSelectChange}
-          options={dropdownOptions.propertyTypes || []}
-          placeholder="Select property types..."
-          hasError={unfilledFields.property_types_required}
-          errorMessage={
-            unfilledFields.property_types_required
-              ? "AI could not determine Property Types"
               : undefined
           }
         />
@@ -390,24 +427,6 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           }}
           options={dropdownOptions.listedByUsers || []}
           placeholder="Search or enter user name/ID"
-        />
-        <SelectField
-          label="Tag"
-          name="tag"
-          value={form.tag}
-          onObjectChange={(tag) => {
-            if (tag) {
-              handleObjectChanges(tag, "tag", "Request");
-            }
-          }}
-          options={
-            dropdownOptions.tags
-              ?.filter(
-                (category) =>
-                  category.name === (form.type === "Buy" ? "Buy" : "Rent")
-              )
-              ?.flatMap((category) => category.tags) || []
-          }
         />
       </div>
 
