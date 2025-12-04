@@ -4,6 +4,9 @@ import {
   type DropdownOptions,
   type User,
   type UnfilledFields,
+  type Tag,
+  type PropertyType,
+  type PropertyLocation,
 } from "../../interfaces";
 import {
   InputField,
@@ -23,8 +26,15 @@ interface InventoryFormProps {
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
-  handleObjectChanges: (object: any, fieldName: string) => void;
+  handleObjectChanges: (
+    object: PropertyType | Tag | User | PropertyLocation, // Added Location type here if needed
+    fieldName: string
+  ) => void;
   unfilledFields?: UnfilledFields;
+  onUpdateField: <K extends keyof InventoryFormType>(
+    name: K,
+    value: InventoryFormType[K]
+  ) => void;
 }
 
 export const InventoryForm: React.FC<InventoryFormProps> = ({
@@ -36,6 +46,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
   onChange,
   handleObjectChanges,
   unfilledFields = {},
+  onUpdateField,
 }) => {
   // Effect to set listed_by from user prop on mount
   useEffect(() => {
@@ -47,31 +58,20 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
   // Effect to handle user changes and auto-populate client details
   useEffect(() => {
     if (form.listed_by) {
-      console.log("form.listed_by", form.listed_by);
       const { name, number } = extractNameAndNumber(form.listed_by.name);
-      console.log("name", name);
-      console.log("number", number);
-      // Create synthetic events for form field updates
-      const clientNameEvent = {
-        target: {
-          name: "client_name",
-          type: "text",
-          value: name || "",
-        },
-      } as React.ChangeEvent<HTMLInputElement>;
 
-      const clientPhoneEvent = {
-        target: {
-          name: "client_phone",
-          type: "text",
-          value: number || "",
-        },
-      } as React.ChangeEvent<HTMLInputElement>;
-
-      onChange(clientNameEvent);
-      onChange(clientPhoneEvent);
+      // ✅ Type-safe updates: TypeScript now knows 'client_name' expects a string
+      onUpdateField("client_name", name || "");
+      onUpdateField("client_phone", number || "");
     }
-  }, [form.listed_by, onChange]);
+  }, [form.listed_by, onUpdateField]);
+
+  useEffect(() => {
+    if (messageId) {
+      // ✅ Type-safe update
+      onUpdateField("message_id", messageId);
+    }
+  }, [messageId, onUpdateField]);
 
   useEffect(() => {
     console.log(messageId);
@@ -83,17 +83,17 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
       },
     } as React.ChangeEvent<HTMLInputElement>;
     onChange(messageIdEvent);
-  }, []);
+  }, [messageId, onChange]);
 
   const renderCoreDetails = () => (
     <div className="space-y-4">
       <SelectField
-          label="Source"
-          name="source"
-          value={form.source}
-          onChange={onChange}
-          options={dropdownOptions.sourceOptions || []}
-        />
+        label="Source"
+        name="source"
+        value={form.source}
+        onChange={onChange}
+        options={dropdownOptions.sourceOptions || []}
+      />
       <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">
         Core Details
       </h3>
@@ -110,7 +110,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           name="tag"
           value={form.tag}
           onObjectChange={(tag) => {
-            handleObjectChanges(tag, "tag");
+            handleObjectChanges(tag as Tag, "tag");
           }}
           options={
             dropdownOptions.tags
@@ -142,7 +142,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           label="Property Type"
           value={form.property_type}
           onObjectChange={(propertyType) => {
-            handleObjectChanges(propertyType, "property_type");
+            handleObjectChanges(propertyType as PropertyType, "property_type");
           }}
           name="property_type"
           options={dropdownOptions.propertyTypes || []}
@@ -347,7 +347,11 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
         <LocationSearch
           mode="single"
           value={form?.location ?? undefined}
-          onChange={(location) => handleObjectChanges(location, "location")}
+          onChange={(location) => {
+            if (location !== null) {
+              handleObjectChanges(location, "location");
+            }
+          }}
           placeholder="Start typing to search for a location..."
           hasError={unfilledFields.location}
           errorMessage={
@@ -460,7 +464,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           name="listed_by"
           value={form.listed_by || null}
           onObjectSelect={(user) => {
-            handleObjectChanges(user, "listed_by");
+            handleObjectChanges(user as User, "listed_by");
           }}
           options={dropdownOptions.listedByUsers || []}
           placeholder="Search or enter user name/ID"

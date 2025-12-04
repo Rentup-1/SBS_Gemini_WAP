@@ -9,7 +9,7 @@ interface SelectOption {
 interface MultiSelectFieldProps {
   label: string;
   name: string;
-  value?: any[]; // Array of selected IDs
+  value?: string[]; // Array of selected IDs
   onChange: (name: string, value: string[]) => void;
   options?: string[] | PropertyType[] | Tag[] | User[] | SelectOption[];
   placeholder?: string;

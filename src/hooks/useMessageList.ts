@@ -9,7 +9,7 @@ import type {
     PaginationMeta
 } from '../interfaces';
 import { INITIAL_FLEXIBLE_ORDER } from '../utils/constants';
-import { fetchMessages } from '../services/messageApi';
+import { fetchMessages } from '../APIs/services/messageApi';
 
 interface UseMessageListReturn {
     messages: Message[];

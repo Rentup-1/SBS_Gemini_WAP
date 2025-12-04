@@ -159,7 +159,9 @@ export const MessageTable: React.FC<MessageTableProps> = ({
                     className={`px-4 py-2 ${
                       key === "actions" ? "w-1/12" : "w-10"
                     }`}
-                  ></th>
+                  >
+                    filter
+                  </th>
                 );
               }
 

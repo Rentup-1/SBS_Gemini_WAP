@@ -2,11 +2,11 @@ import React, { useEffect } from "react";
 import {
   type RequestForm as RequestFormType,
   type DropdownOptions,
-  type Location,
   type User,
   type UnfilledFields,
   type PropertyType,
   type Tag,
+  type PropertyLocation,
 } from "../../interfaces";
 import {
   CheckboxGroup,
@@ -27,14 +27,19 @@ interface RequestFormProps {
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
-  onLocationChange: (locations: Location[]) => void;
+  onLocationChange: (locations: PropertyLocation[]) => void;
   handleMultiSelectChange: (name: string, value: string[]) => void;
   handleObjectChanges: (
-    object: Tag | PropertyType | User,
+    object: Tag | PropertyType | User | PropertyLocation,
     fieldName: string,
     formType: string
   ) => void;
   unfilledFields?: UnfilledFields;
+  // ✅ Fix: Add generic updater prop
+  onUpdateField: <K extends keyof RequestFormType>(
+    name: K,
+    value: RequestFormType[K]
+  ) => void;
 }
 
 export const RequestForm: React.FC<RequestFormProps> = ({
@@ -48,6 +53,7 @@ export const RequestForm: React.FC<RequestFormProps> = ({
   handleMultiSelectChange,
   handleObjectChanges,
   unfilledFields = {},
+  onUpdateField, // ✅ Receive the prop
 }) => {
   // Effect to set client_user from user prop on mount
   useEffect(() => {
@@ -56,43 +62,21 @@ export const RequestForm: React.FC<RequestFormProps> = ({
     }
   }, [user, form.client_user, handleObjectChanges]);
 
-  // Effect to auto-populate client details when client_user changes
+  // ✅ Fix: Use clean update logic instead of Synthetic Events
   useEffect(() => {
     if (form.client_user) {
       const { name, number } = extractNameAndNumber(form.client_user.name);
 
-      // Create synthetic events for form field updates
-      const clientNameEvent = {
-        target: {
-          name: "client_name",
-          type: "text",
-          value: name || "",
-        },
-      } as React.ChangeEvent<HTMLInputElement>;
-
-      const clientPhoneEvent = {
-        target: {
-          name: "client_phone",
-          type: "text",
-          value: number || "",
-        },
-      } as React.ChangeEvent<HTMLInputElement>;
-
-      onChange(clientNameEvent);
-      onChange(clientPhoneEvent);
+      onUpdateField("client_name", name || "");
+      onUpdateField("client_phone", number || "");
     }
-  }, [form.client_user, onChange]);
+  }, [form.client_user, onUpdateField]);
 
   useEffect(() => {
-    const messageIdEvent = {
-      target: {
-        name: "message_id",
-        type: "text",
-        value: messageId || "",
-      },
-    } as React.ChangeEvent<HTMLInputElement>;
-    onChange(messageIdEvent);
-  }, []);
+    if (messageId) {
+      onUpdateField("message_id", messageId);
+    }
+  }, [messageId, onUpdateField]);
 
   const renderCoreDetails = () => (
     <div className="space-y-4">

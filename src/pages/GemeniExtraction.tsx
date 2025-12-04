@@ -7,6 +7,7 @@ import {
   type User,
   type UnfilledFields,
   type AlertPopupProps,
+  type PropertyLocation as AppLocation, // ✅ 1. Alias to avoid conflict with Router Location
 } from "../interfaces";
 import { useDropdownData } from "../hooks/useDropdownData";
 import { useFormHandlers } from "../hooks/useFormHandlers";
@@ -14,8 +15,9 @@ import { useAIParsing } from "../hooks/useAIParsing";
 import { InventoryForm as InventoryFormComponent } from "../components/forms/InventoryForm";
 import { RequestForm as RequestFormComponent } from "../components/forms/RequestForm";
 import { AIPanel } from "../components/ai/AIPanel";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom"; // This creates a 'Location' type implicitly
 import { AlertPopup } from "../components/common";
+import { matchFuzzyLocations } from "../APIs/services/locationService";
 
 export default function GemeniExtraction() {
   const [alertState, setAlertState] = useState<AlertPopupProps>({
@@ -32,6 +34,7 @@ export default function GemeniExtraction() {
   const { dropdownOptions, setDropdownOptions } = useDropdownData({
     formType: phoneStatus,
   });
+
   const {
     form,
     setForm,
@@ -41,16 +44,35 @@ export default function GemeniExtraction() {
     requestTransactionOptions,
     handleInventoryInputChange,
     handleRequestInputChange,
-    handleLocationChange,
-    handleMultiSelectChange,
     handleObjectChanges,
+    updateInventoryField,
+    updateRequestField,
   } = useFormHandlers(dropdownOptions);
+
+  // ✅ 2. Use AppLocation here explicitly
+  const handleLocationChange = (locations: AppLocation[]) => {
+    updateRequestField("locations", locations);
+  };
+
+  // ✅ 3. Fix MultiSelect error by asserting types
+  const handleMultiSelectChange = (name: string, value: string[]) => {
+    const validName = name as "property_types_required" | "options_required";
+    updateRequestField(validName, value);
+  };
 
   const [whatsappInput, setWhatsappInput] = useState("");
   const [savedData] = useState<Array<InventoryForm | RequestForm>>([]);
   const [loading, setLoading] = useState(false);
   const [unfilledFields, setUnfilledFields] = useState<UnfilledFields>({});
+
   const location: LocationState = useLocation();
+
+  // ------------------------------------------------------------------
+  //  Fuzzy Location Logic
+  // ------------------------------------------------------------------
+  const [fuzzyLocationInput, setFuzzyLocationInput] = useState("");
+  const [fuzzyLocationResponse, setFuzzyLocationResponse] = useState("");
+  const [fuzzyLoading, setFuzzyLoading] = useState(false);
 
   const {
     aiResponseRaw,
@@ -97,6 +119,63 @@ export default function GemeniExtraction() {
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   }
+
+  const handleFuzzySearch = async () => {
+    if (!fuzzyLocationInput.trim()) return;
+
+    setFuzzyLoading(true);
+    setFuzzyLocationResponse("");
+
+    try {
+      const locationsArray = fuzzyLocationInput
+        .split(",")
+        .map((loc) => loc.trim())
+        .filter((loc) => loc.length > 0);
+
+      const result = await matchFuzzyLocations(locationsArray);
+      setFuzzyLocationResponse(JSON.stringify(result, null, 2));
+    } catch (error) {
+      console.error("Fuzzy search failed:", error);
+      setFuzzyLocationResponse(
+        JSON.stringify({ error: "Failed to match locations" }, null, 2)
+      );
+    } finally {
+      setFuzzyLoading(false);
+    }
+  };
+
+  const handleConfirmFuzzyLocation = (
+    selectedLocations: { id: number; name: string }[]
+  ) => {
+    if (!selectedLocations || selectedLocations.length === 0) {
+      setMessage("Please select a location first.");
+      return;
+    }
+
+    if (phoneStatus === "Inventory") {
+      const locationObj = selectedLocations[0];
+      // Casting to AppLocation to be safe
+      updateInventoryField("location", locationObj as unknown as AppLocation);
+      setUnfilledFields((prev) => ({ ...prev, location: false }));
+      setMessage(`Location updated to: ${locationObj.name}`);
+    } else {
+      setRequestForm((prev) => {
+        const currentLocs = prev.locations || [];
+        const currentIds = new Set(currentLocs.map((l) => l.id));
+        const newLocs = selectedLocations.filter((l) => !currentIds.has(l.id));
+        if (newLocs.length === 0) return prev;
+
+        // Ensure type safety
+        const safeNewLocs = newLocs as unknown as AppLocation[];
+        return {
+          ...prev,
+          locations: [...currentLocs, ...safeNewLocs],
+        };
+      });
+      setUnfilledFields((prev) => ({ ...prev, locations: false }));
+      setMessage(`Added ${selectedLocations.length} locations to Request.`);
+    }
+  };
 
   const handleSaveData = useCallback(async () => {
     try {
@@ -176,15 +255,15 @@ export default function GemeniExtraction() {
         bua: data.bua,
         ...(isInventory
           ? {
-              inventory_options: data.options_required
+              inventory_options: data.options_required,
             }
           : {
-              request_options: data.options_required
+              request_options: data.options_required,
             }),
         source: data.source,
         direct: data.is_direct,
       };
-      // console.log(submissionData);
+
       const endpoint = isInventory
         ? "https://sbsapi.rentup.com.eg/api/migrate/messages/inventory"
         : "https://sbsapi.rentup.com.eg/api/migrate/messages/request";
@@ -201,7 +280,6 @@ export default function GemeniExtraction() {
       const result = await response.json();
 
       if (!response.ok) {
-        // const errorText = await response.text();
         let errorMessage = "Creation failed";
         if (result.errors && typeof result.errors === "object") {
           const errorList = Object.entries(result.errors)
@@ -272,6 +350,7 @@ export default function GemeniExtraction() {
           user={user || null}
           messageId={location?.state?.id || null}
           unfilledFields={unfilledFields}
+          onUpdateField={updateInventoryField}
         />
       ) : (
         <RequestFormComponent
@@ -285,48 +364,18 @@ export default function GemeniExtraction() {
           user={user || null}
           messageId={location?.state?.id || null}
           unfilledFields={unfilledFields}
+          onUpdateField={updateRequestField}
         />
       )}
 
+      {/* ... Buttons and Saved Data UI ... */}
       <div className="mt-8 pt-4 border-t">
         <button
           onClick={handleSaveData}
-          disabled={
-            loading ||
-            aiLoading ||
-            (phoneStatus === "Inventory" && (!form.location || !form.price)) ||
-            (phoneStatus === "Request" &&
-              (!requestForm.locations || !requestForm.price))
-          }
+          disabled={loading || aiLoading}
           className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:bg-green-700 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
         >
-          {loading ? (
-            <>
-              <svg
-                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Saving...
-            </>
-          ) : (
-            `Save ${phoneStatus} Data`
-          )}
+          {loading ? "Saving..." : `Save ${phoneStatus} Data`}
         </button>
       </div>
 
@@ -338,13 +387,7 @@ export default function GemeniExtraction() {
           <div className="text-xs text-gray-600 space-y-1 max-h-40 overflow-y-auto">
             {savedData.map((item, idx) => (
               <div key={idx} className="p-2 bg-white rounded border">
-                {String("id" in item ? item.id : "No ID")} -{" "}
-                {String(
-                  ("location" in item
-                    ? item.location?.name
-                    : (item as RequestForm).locations?.[0]?.name) ||
-                    "No location"
-                )}
+                {String("id" in item ? item.id : "No ID")}
               </div>
             ))}
           </div>
@@ -381,6 +424,13 @@ export default function GemeniExtraction() {
             onConfirm={() =>
               handleConfirmParse(aiResponseRaw, whatsappInput, phoneStatus)
             }
+            fuzzyLocationInput={fuzzyLocationInput}
+            setFuzzyLocationInput={setFuzzyLocationInput}
+            fuzzyLocationResponse={fuzzyLocationResponse}
+            setFuzzyLocationResponse={setFuzzyLocationResponse}
+            onFuzzySearch={handleFuzzySearch}
+            onConfirmFuzzyLocation={handleConfirmFuzzyLocation}
+            fuzzyLoading={fuzzyLoading}
           />
           <AlertPopup
             isOpen={alertState.isOpen}

@@ -1,174 +1,176 @@
-import { useState, useCallback, useMemo } from 'react';
-import type { InventoryForm, RequestForm, DropdownOptions, Location, PropertyType, Tag, User } from '../interfaces';
-import { initialFormState, initialRequestFormState } from '../utils/constants';
+import { useState, useCallback, useMemo } from "react";
+import type {
+  InventoryForm,
+  RequestForm,
+  DropdownOptions,
+  PropertyLocation as AppLocation, // ✅ Fix: Alias here specifically
+  PropertyType,
+  Tag,
+  User,
+} from "../interfaces";
+import { initialFormState, initialRequestFormState } from "../utils/constants";
 
 export const useFormHandlers = (dropdownOptions: DropdownOptions) => {
   const [form, setForm] = useState<InventoryForm>(initialFormState);
-  const [requestForm, setRequestForm] = useState<RequestForm>(initialRequestFormState);
+  const [requestForm, setRequestForm] = useState<RequestForm>(
+    initialRequestFormState
+  );
 
-  const inventoryTransactionOptions = useMemo(() => {
-    if (form.type === 'For Rent') {
-      return dropdownOptions.forRentTransactionTypes || [];
-    }
-    if (form.type === 'For Sale') {
-      return dropdownOptions.forSaleTransactionTypes || [];
-    }
-    return [];
-  }, [form.type, dropdownOptions]);
+  // Generic updaters
+  const updateInventoryField = useCallback(
+    <K extends keyof InventoryForm>(name: K, value: InventoryForm[K]) => {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    },
+    []
+  );
 
-  const requestTransactionOptions = useMemo(() => {
-    if (requestForm.type === 'Rent') {
-      return dropdownOptions.forRentTransactionTypes || [];
-    }
-    if (requestForm.type === 'Buy') {
-      return dropdownOptions.forSaleTransactionTypes || [];
-    }
-    return [];
-  }, [requestForm.type, dropdownOptions]);
+  const updateRequestField = useCallback(
+    <K extends keyof RequestForm>(name: K, value: RequestForm[K]) => {
+      setRequestForm((prev) => ({ ...prev, [name]: value }));
+    },
+    []
+  );
 
-  const handleInventoryInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked;
-    console.log(name, checked)
-    
-    if (name === 'type') {
-      const properType = value === 'For Rent' ? 'For Rent' :
-        value === 'For Sale' ? 'For Sale' :
-          'For Sale';
-      const defaultTransaction = value === 'For Rent' ? 'Monthly' :
-        value === 'For Sale' ? 'Cash' :
-          '';
+  const handleInputChange = useCallback(
+    (
+      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+      formType: "Inventory" | "Request"
+    ) => {
+      const { name, value, type } = e.target;
+      const checked = (e.target as HTMLInputElement).checked;
 
-      setForm(prev => ({
-        ...prev,
-        [name]: properType,
-        transaction: defaultTransaction
-      }));
-      return;
-    }
-
-    if (type === 'checkbox') {
-      // Handle checkbox list fields (like property_types, options, etc.)
-      if ( name === 'options_required') {
-        const listName = name as 'options_required';
-        const optionValue = (e.target as HTMLInputElement).value;
-
-        setForm(prev => {
-          const currentList = prev[listName];
-          if (checked) {
-            return { ...prev, [listName]: [...(currentList || []), optionValue] };
-          } else {
-            return { ...prev, [listName]: (currentList || []).filter(item => item !== optionValue) };
-          }
-        });
+      if (name === "type") {
+        if (formType === "Inventory") {
+          const properType = (
+            value === "For Rent" ? "For Rent" : "For Sale"
+          ) as InventoryForm["type"];
+          const defaultTransaction =
+            properType === "For Rent" ? "Monthly" : "Cash";
+          setForm((prev) => ({
+            ...prev,
+            type: properType,
+            transaction: defaultTransaction,
+          }));
+        } else {
+          const properType = (
+            value === "Rent" ? "Rent" : "Buy"
+          ) as RequestForm["type"];
+          const defaultTransaction = properType === "Rent" ? "Monthly" : "Cash";
+          setRequestForm((prev) => ({
+            ...prev,
+            type: properType,
+            transaction: defaultTransaction,
+          }));
+        }
         return;
       }
 
-      // Handle single boolean checkboxes
-      setForm(prev => ({
-        ...prev,
-        [name]: checked
-      }));
-      return;
-    }
+      if (type === "checkbox") {
+        if (name === "options_required" || name === "property_types_required") {
+          const isInventory = formType === "Inventory";
+          if (isInventory) {
+            setForm((prev) => {
+              const key = name as "options_required";
+              const currentList = prev[key] || [];
+              return {
+                ...prev,
+                [key]: checked
+                  ? [...currentList, value]
+                  : currentList.filter((item) => item !== value),
+              };
+            });
+          } else {
+            setRequestForm((prev) => {
+              const key = name as
+                | "options_required"
+                | "property_types_required";
+              const currentList = prev[key] || [];
+              return {
+                ...prev,
+                [key]: checked
+                  ? [...currentList, value]
+                  : currentList.filter((item) => item !== value),
+              };
+            });
+          }
+          return;
+        }
+        if (formType === "Inventory")
+          setForm((prev) => ({ ...prev, [name]: checked }));
+        else setRequestForm((prev) => ({ ...prev, [name]: checked }));
+        return;
+      }
 
-    setForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  }, []);
+      if (formType === "Inventory")
+        setForm((prev) => ({ ...prev, [name]: value }));
+      else setRequestForm((prev) => ({ ...prev, [name]: value }));
+    },
+    []
+  );
 
-  const handleRequestInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked;
+  const handleInventoryInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      handleInputChange(e, "Inventory");
+    },
+    [handleInputChange]
+  );
 
-    if (name === 'type') {
-      const typedType = value === 'Rent' ? 'Rent' :
-        value === 'Buy' ? 'Buy' :
-          'Rent';
-      const defaultTransaction = value === 'Rent' ? 'Monthly' :
-        value === 'Buy' ? 'Cash' :
-          '';
+  const handleRequestInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      handleInputChange(e, "Request");
+    },
+    [handleInputChange]
+  );
 
-      setRequestForm(prev => ({
-        ...prev,
-        type: typedType,
-        transaction: defaultTransaction
-      }));
-      return;
-    }
-
-    if (type === 'checkbox') {
-      if (name === 'is_urgent' || name === "is_direct") {
-        setRequestForm(prev => ({
+  // ✅ Fix: Use AppLocation alias here to match the Component's expectation
+  const handleObjectChanges = useCallback(
+    (
+      object: Tag | PropertyType | User | AppLocation,
+      fieldName: string,
+      formType: string = "Inventory"
+    ) => {
+      if (formType === "Inventory") {
+        setForm((prev) => ({
           ...prev,
-          [name]: checked
+          [fieldName as keyof InventoryForm]: object,
+        }));
+      } else {
+        setRequestForm((prev) => ({
+          ...prev,
+          [fieldName as keyof RequestForm]: object,
         }));
       }
+    },
+    []
+  );
 
-      if (name === 'property_types_required' || name === 'options_required') {
-        const listName = name as 'property_types_required' | 'options_required';
-        const optionValue = (e.target as HTMLInputElement).value;
+  const inventoryTransactionOptions = useMemo(
+    () =>
+      form.type === "For Rent"
+        ? dropdownOptions.forRentTransactionTypes || []
+        : dropdownOptions.forSaleTransactionTypes || [],
+    [form.type, dropdownOptions]
+  );
 
-        setRequestForm(prev => {
-          const currentList = prev[listName];
-          if (checked) {
-            return { ...prev, [listName]: [...(currentList || []), optionValue] };
-          } else {
-            return { ...prev, [listName]: (currentList || []).filter(item => item !== optionValue) };
-          }
-        });
-      }
-      return;
-    }
+  const requestTransactionOptions = useMemo(
+    () =>
+      requestForm.type === "Rent"
+        ? dropdownOptions.forRentTransactionTypes || []
+        : dropdownOptions.forSaleTransactionTypes || [],
+    [requestForm.type, dropdownOptions]
+  );
 
-    setRequestForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  }, []);
-
-  const handleLocationChange = useCallback((locations: Location[]) => {
-    setRequestForm(prev => ({
-      ...prev,
-      locations: locations
-    }));
-  }, []);
-
-  // New handler for multi-select fields (returns array of IDs directly)
-  const handleMultiSelectChange = useCallback((name: string, value: string[] | number[]) => {
-    
-    setRequestForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  }, []);
-
-  const handleObjectChanges = useCallback((object: Tag | PropertyType | User, fieldName: string, formType: string = "Inventory") => {
-    if(formType === "Inventory"){
-    setForm((prev) => ({
-      ...prev,
-      [fieldName]: object,
-    }));
-  }else{
-    setRequestForm((prev) => ({
-      ...prev,
-      [fieldName]: object,
-    }))
-  }
-  }, []);
-
-return {
-  form,
-  setForm,
-  requestForm,
-  setRequestForm,
-  inventoryTransactionOptions,
-  requestTransactionOptions,
-  handleInventoryInputChange,
-  handleRequestInputChange,
-  handleLocationChange,
-  handleMultiSelectChange,
-  handleObjectChanges
-};
+  return {
+    form,
+    setForm,
+    requestForm,
+    setRequestForm,
+    inventoryTransactionOptions,
+    requestTransactionOptions,
+    handleInventoryInputChange,
+    handleRequestInputChange,
+    handleObjectChanges,
+    updateInventoryField,
+    updateRequestField,
+  };
 };

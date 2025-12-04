@@ -35,7 +35,7 @@ export interface InventoryForm {
   bedrooms: number;
   bathrooms: number;
   no_master_bedroom: number;
-  location?: Location;
+  location?: PropertyLocation;
   listed_by?: User;
   tag?: Tag;
   deal_type: string;
@@ -71,13 +71,13 @@ export interface RequestForm {
   bua: number;
   deal_type: string;
   reference_id: string;
-  locations?: Location[];
+  locations?: PropertyLocation[];
   property_types_required?: string[];
   options_required: string[];
   client_user?: User;
   assigned_agent: string;
   owner: string;
-  tag?: Tag;
+  tag?: Tag | null;
   is_urgent: boolean;
   is_direct: boolean;
   whatsapp_message: string;
@@ -234,7 +234,7 @@ export interface ApiError {
   status: number;
   code?: string;
 }
-export interface Location {
+export interface PropertyLocation {
   id: number;
   name: string;
 }

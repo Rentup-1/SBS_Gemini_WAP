@@ -25,31 +25,46 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   onChange,
   maxHeight = "max-h-40",
   className = "",
-  selectAllByDefault = true // Default to true - all options selected
+  selectAllByDefault = true, // Default to true - all options selected
 }) => {
-  const isObjectArray = options.length > 0 && typeof options[0] === 'object' && 'value' in (options[0] as any);
+  const isObjectArray =
+    options.length > 0 &&
+    typeof options[0] === "object" &&
+    "value" in (options[0]);
 
   // Get all option values for select all functionality
-  const allOptionValues = options.map(option => 
-    isObjectArray ? (option as CheckboxOption).value : option as string
+  const allOptionValues = options.map((option) =>
+    isObjectArray ? (option as CheckboxOption).value : (option as string)
   );
 
   // If selectAllByDefault is true and no values are selected, select all
-  const effectiveSelectedValues = selectAllByDefault && selectedValues.length === 0 
-    ? allOptionValues 
-    : selectedValues;
+  const effectiveSelectedValues =
+    selectAllByDefault && selectedValues.length === 0
+      ? allOptionValues
+      : selectedValues;
 
   return (
     <div className={`flex flex-col space-y-2 ${className}`}>
       <label className="text-sm font-medium text-gray-700">{label}</label>
-      <div className={`flex flex-wrap gap-2 text-sm overflow-y-auto ${maxHeight}`}>
-        {options?.map(option => {
-          const value = isObjectArray ? (option as CheckboxOption).value : option as string;
-          const labelText = isObjectArray ? (option as CheckboxOption).label : option as string;
-          const icon = isObjectArray ? (option as CheckboxOption).icon : undefined;
+      <div
+        className={`flex flex-wrap gap-2 text-sm overflow-y-auto ${maxHeight}`}
+      >
+        {options?.map((option) => {
+          const value = isObjectArray
+            ? (option as CheckboxOption).value
+            : (option as string);
+          const labelText = isObjectArray
+            ? (option as CheckboxOption).label
+            : (option as string);
+          const icon = isObjectArray
+            ? (option as CheckboxOption).icon
+            : undefined;
 
           return (
-            <label key={value} className="flex items-center space-x-1 cursor-pointer">
+            <label
+              key={value}
+              className="flex items-center space-x-1 cursor-pointer"
+            >
               <input
                 type="checkbox"
                 name={name}
