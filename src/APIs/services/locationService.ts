@@ -57,7 +57,7 @@ export const matchFuzzyLocations = async (
   // parentContext: string = "cairo"
 ): Promise<FuzzyMatchResponse> => {
   try {
-    const url = "/api/v1/fuzzy/match/";
+    const url = "https://api.sbs-brokerz.com/api/v1/fuzzy/match/";
 
     const payload: FuzzyMatchPayload = {
       // locale: "en",
