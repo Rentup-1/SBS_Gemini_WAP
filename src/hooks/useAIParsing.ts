@@ -14,12 +14,12 @@ import { capitalizeFirst } from "../utils/formats";
 
 export const useAIParsing = (
   setInventoryForm: React.Dispatch<React.SetStateAction<InventoryForm>>,
-  inventoryForm: InventoryForm,
+  // inventoryForm: InventoryForm,
   setRequestForm: React.Dispatch<React.SetStateAction<RequestForm>>,
-  requestForm: RequestForm,
+  // requestForm: RequestForm,
   setWhatsappInput: (input: string) => void,
   dropdownOptions: DropdownOptions,
-  setDropdownOptions: (dropdownOptions: DropdownOptions) => void,
+  // setDropdownOptions: (dropdownOptions: DropdownOptions) => void,
   setUnfilledFields: (fields: UnfilledFields) => void
 ) => {
   const [aiResponseRaw, setAiResponseRaw] = useState("");

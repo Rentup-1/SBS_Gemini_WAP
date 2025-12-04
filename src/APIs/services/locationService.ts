@@ -1,4 +1,4 @@
-import type { Location } from "../../interfaces";
+import type { PropertyLocation as Location } from "../../interfaces";
 import { API_URL_BASE } from "../../utils/constants";
 import { retryFetch } from "../../utils/helpers";
 

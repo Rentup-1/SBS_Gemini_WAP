@@ -31,7 +31,7 @@ export default function GemeniExtraction() {
   );
   const [response, setResonse] = useState<Message>();
   const [user, setUser] = useState<User>();
-  const { dropdownOptions, setDropdownOptions } = useDropdownData({
+  const { dropdownOptions } = useDropdownData({
     formType: phoneStatus,
   });
 
@@ -85,12 +85,12 @@ export default function GemeniExtraction() {
     setAiResponseRaw,
   } = useAIParsing(
     setForm,
-    form,
+    // form,
     setRequestForm,
-    requestForm,
+    // requestForm,
     setWhatsappInput,
     dropdownOptions,
-    setDropdownOptions,
+    // setDropdownOptions,
     setUnfilledFields
   );
 
