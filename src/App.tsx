@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Extraction from "./pages/Extraction";
 import NotFound from "./pages/NotFound";
+import AuthProtectedRoute from "./components/AuthProtectedRoute";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,7 +28,14 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<Login />} />
+            <Route
+              path="/login"
+              element={
+                <AuthProtectedRoute>
+                  <Login />
+                </AuthProtectedRoute>
+              }
+            />
             <Route
               path="/"
               element={
