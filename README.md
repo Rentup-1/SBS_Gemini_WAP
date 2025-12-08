@@ -1,73 +1,47 @@
-# Welcome to your Lovable project
+# SBS Gemini WAP - AI Ingestion System
 
-## Project info
+A specialized React dashboard designed to streamline the ingestion of real estate data from WhatsApp messages. This system utilizes AI to parse unstructured text messages into structured **Inventory** or **Client Request** records, featuring intelligent fuzzy location matching and dynamic forms.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🚀 Features
 
-## How can I edit this code?
+- **Message Dashboard**: View, filter, and manage incoming WhatsApp messages in real-time.
+- **AI Extraction Engine**: Automatically parses unstructured message text to extract key details (Price, Area, Location, Bedrooms, etc.).
+- **Smart Forms**:
+  - **Inventory Form**: Single-select locations, specific property attributes.
+  - **Request Form**: Multi-select locations/types, budget ranges, and specifications.
+- **Fuzzy Location Matching**: Advanced search to map extracted text to database location IDs with confidence scores.
+- **Secure Authentication**: Robust login system with Access/Refresh token rotation.
+- **Responsive UI**: Built with a clean, modern interface using Shadcn UI.
 
-There are several ways of editing your application.
+## 🛠️ Tech Stack
 
-**Use Lovable**
+- **Framework**: [React](https://react.dev/) (v18) with [Vite](https://vitejs.dev/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **UI Components**: [Shadcn UI](https://ui.shadcn.com/) (based on Radix UI)
+- **State Management**: [TanStack Query](https://tanstack.com/query/latest) (React Query)
+- **Form Handling**: [React Hook Form](https://react-hook-form.com/)
+- **Networking**: [Axios](https://axios-http.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## 📂 Project Structure
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+src/
+├── api/            # API endpoints and axios configuration
+├── components/     # Reusable UI components
+│   ├── ai/         # AI Extraction Panel logic
+│   ├── forms/      # Inventory and Request forms
+│   └── ui/         # Shadcn base components
+├── contexts/       # Global state (AuthContext)
+├── hooks/          # Custom hooks (use-toast, etc.)
+├── pages/          # Main application pages (Dashboard, Extraction, Login)
+└── types/          # TypeScript definitions and interfaces
 ```
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🔐 Authentication Flow
+- The application handles authentication using JWT (JSON Web Tokens):
+- **Login**: User logs in via phone number and password.
+- **Storage**: Tokens are securely managed in memory/local storage.
+- **Interceptor**: Axios interceptors automatically handle 401 errors by attempting to refresh the access token transparently using the refresh token.
+- **Session Persistence**: The app verifies the user session on load via the /auth/me endpoint.
