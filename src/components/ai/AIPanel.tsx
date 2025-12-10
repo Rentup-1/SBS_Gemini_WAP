@@ -22,20 +22,18 @@ import { AxiosError } from "axios";
 import {
   ArrowRightLeft,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Copy,
+  Globe,
   Loader2,
   MapPin,
+  MessageCircle,
   Phone,
   Search,
   Sparkles,
+  TagIcon,
   User,
-  ChevronLeft,
-  ChevronRight,
-  Globe,
-  Globe2,
-  GlobeIcon,
-  Globe2Icon,
-  GlobeLock,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -419,8 +417,7 @@ const AIPanel = ({
           </Button>
         </div>
 
-        {/* <div className="grid grid-cols-3 gap-3 text-sm"> */}
-        <div className="flex align-center justify-between text-sm">
+        <div className="grid grid-cols-3 gap-4 text-sm">
           <div className="space-y-1">
             <span className="text-xs text-muted-foreground flex items-center gap-1">
               <User className="w-3 h-3" /> Username
@@ -437,10 +434,32 @@ const AIPanel = ({
           </div>
           <div className="space-y-1">
             <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Globe className="w-3 h-3" />  Status
+              <Globe className="w-3 h-3" /> Status
             </span>
-            <p className={` ${message.listing_status === "not_listed" ? "text-red-600" : "text-green-600" } font-medium text-slate-800`}>
+            <p
+              className={` ${
+                message.listing_status === "not_listed"
+                  ? "text-red-600"
+                  : "text-green-600"
+              } font-medium`}
+            >
               {message.listing_status || "Unknown"}
+            </p>
+          </div>
+          <div className="space-y-1">
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <MessageCircle className="w-3 h-3" /> Message ID
+            </span>
+            <p className={` font-medium text-slate-800`}>
+              {message.id || "Unknown"}
+            </p>
+          </div>
+          <div className="space-y-1">
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <TagIcon className="w-3 h-3" /> Type
+            </span>
+            <p className="font-medium text-blue-700">
+              {message.type || "Unknown"}
             </p>
           </div>
         </div>
