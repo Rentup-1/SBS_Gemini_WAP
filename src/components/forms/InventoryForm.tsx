@@ -314,7 +314,7 @@ const InventoryForm = ({
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label>Location (Selected via AI Panel or search manually)</Label>
+          <Label>Location (Selected via AI Panel or search box below)</Label>
           <LocationSearch
             defaultValue={locationName}
             onSelect={(loc) => {

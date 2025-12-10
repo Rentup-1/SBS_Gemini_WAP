@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import type { PropertyType, Tag, FurnishedType, Message } from "@/types";
+import { LocationSearch } from "../common/LocationSearch";
 
 interface RequestFormProps {
   propertyTypes: PropertyType[];
@@ -59,8 +60,15 @@ const RequestForm = ({
   // watch for request options
   const requestOptions = watch("request_options_ui") || {};
   const optionsKeys = Object.keys(requestOptions);
+
   return (
     <div className="space-y-6 p-1">
+      {/* header */}
+      <div className="space-y-1.5">
+        <h4 className="text-lg text-center font-semibold text-blue-600">
+          Request Details
+        </h4>
+      </div>
       {/* 1. Core Details */}
       <div className="space-y-4">
         <h4 className="text-sm font-semibold text-slate-800 border-b pb-2">
@@ -244,6 +252,14 @@ const RequestForm = ({
         {/* Duration Details */}
         <div className="grid grid-cols-4 gap-4 bg-slate-50 p-3 rounded-md border">
           <div className="space-y-1.5">
+            <Label className="text-xs">Duration Period</Label>
+            <Input
+              {...register("duration_period")}
+              placeholder="e.g. 12"
+              className="h-8"
+            />
+          </div>
+          <div className="space-y-1.5">
             <Label className="text-xs">Duration Type</Label>
             <Controller
               name="duration_type"
@@ -285,6 +301,28 @@ const RequestForm = ({
             <Label className="text-xs">Inst. Period</Label>
             <Input {...register("installment_period")} className="h-8" />
           </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Inst. Type</Label>
+            <Controller
+              name="installment_type"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || ""}
+                >
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="MONTHLY">Months</SelectItem>
+                    <SelectItem value="YEARLY">Years</SelectItem>
+                    <SelectItem value="DAILY">Days</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
         </div>
       </div>
 
@@ -317,21 +355,48 @@ const RequestForm = ({
           </div>
         </div>
 
-        <div className="space-y-1.5 mt-2">
-          <Label>Locations (Selected via AI Panel)</Label>
-          <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-green-50 border-green-200 min-h-[42px]">
+        <div className="space-y-2 mt-2">
+          <Label>Locations (Selected via AI Panel or search box below )</Label>
+
+          {/* Location Search Component */}
+          <LocationSearch
+            placeholder="+ Add location..."
+            defaultValue={locationNames.join(", ")}
+            onSelect={(loc) => {
+              // Check if location is already selected before adding to stop duplicates
+              if (!locationIds.includes(loc.id)) {
+                setValue("exact_location_ids", [...locationIds, loc.id], {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+                setValue("location_names_display", [
+                  ...locationNames,
+                  loc.name,
+                ]);
+              }
+            }}
+          />
+
+          {/* Selected Locations Display */}
+          <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-white min-h-[42px]">
             {locationNames.length === 0 ? (
-              <span className="text-sm text-green-800 self-center">
-                No locations selected yet.
+              <span className="text-xs text-muted-foreground self-center px-2">
+                No locations selected.
               </span>
             ) : (
               locationNames.map((name: string, idx: number) => (
-                <Badge key={idx} variant="outline" className="bg-white gap-1">
-                  {name}{" "}
-                  <X
-                    className="w-3 h-3 cursor-pointer text-muted-foreground hover:text-red-500"
+                <Badge
+                  key={idx}
+                  variant="secondary"
+                  className="gap-1 pr-1 bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
+                >
+                  {name}
+                  <div
+                    className="hover:bg-red-200 rounded-full p-0.5 cursor-pointer transition-colors"
                     onClick={() => removeLocation(idx)}
-                  />
+                  >
+                    <X className="w-3 h-3 text-muted-foreground hover:text-red-600" />
+                  </div>
                 </Badge>
               ))
             )}
