@@ -152,6 +152,7 @@ const Dashboard = () => {
     navigate("/extraction", {
       state: {
         fullMessage: message,
+        contextList: processedData,
       },
     });
   };
@@ -355,7 +356,7 @@ const Dashboard = () => {
                             {msg.id}
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">
-                            {formatDate(msg.sent_at || msg.created_at)}
+                            {formatDate(msg.created_at || msg.sent_at)}
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col">

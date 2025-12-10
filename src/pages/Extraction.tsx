@@ -1,24 +1,24 @@
-import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useForm, FormProvider } from "react-hook-form";
 import {
-  getTags,
-  getPropertyTypes,
   getFurnishedTypes,
+  getPropertyTypes,
+  getTags,
   saveInventory,
   saveRequest,
 } from "@/api/core";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Loader2, LogOut, Sparkles } from "lucide-react";
+import AIPanel from "@/components/ai/AIPanel";
 import InventoryForm from "@/components/forms/InventoryForm";
 import RequestForm from "@/components/forms/RequestForm";
-import AIPanel from "@/components/ai/AIPanel";
-import type { InventoryPayload, RequestPayload, Message } from "@/types"; 
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import type { InventoryPayload, Message, RequestPayload } from "@/types";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { ArrowLeft, Loader2, LogOut, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Extraction = () => {
   const location = useLocation();
@@ -26,8 +26,57 @@ const Extraction = () => {
   const { logout } = useAuth();
   const { toast } = useToast();
 
-  const state = location.state as { fullMessage: Message } | null;
+  const state = location.state as {
+    fullMessage: Message;
+    contextList?: Message[];
+  } | null;
   const message = state?.fullMessage;
+  const AllMessages = state?.contextList;
+  const [currentMessage, setCurrentMessage] = useState<Message | null>(
+    message || null
+  );
+
+  const handleNavigateMessage = (direction: "next" | "prev") => {
+    if (!AllMessages || !currentMessage) return;
+
+    // know the index of the current message
+    const currentIndex = AllMessages.findIndex(
+      (m) => m.id === currentMessage.id
+    );
+    if (currentIndex === -1) return;
+
+    const nextIndex =
+      direction === "next" ? currentIndex + 1 : currentIndex - 1;
+
+    // check if the next index is valid
+    if (nextIndex >= 0 && nextIndex < state.contextList.length) {
+      const nextMessage = AllMessages[nextIndex];
+
+      // update the current message
+      setCurrentMessage(nextMessage);
+
+      // update the URL with the new message to be extracted when user refresh the page
+      navigate("/extraction", {
+        state: {
+          fullMessage: nextMessage,
+          contextList: state.contextList,
+        },
+        replace: true, 
+      });
+      // scroll to the top of the page
+      window.scrollTo(0, 0);
+      setFormType(
+        nextMessage.type?.toLowerCase() === "request" ? "request" : "inventory"
+      );
+    }
+  };
+
+  const currentIndex = AllMessages
+    ? state.contextList.findIndex((m) => m.id === currentMessage?.id)
+    : 0;
+  const totalMessages = AllMessages?.length || 0;
+  const hasNext = currentIndex < totalMessages - 1;
+  const hasPrev = currentIndex > 0;
 
   const [formType, setFormType] = useState<"inventory" | "request">(
     message?.type?.toLowerCase() === "request" ? "request" : "inventory"
@@ -57,10 +106,10 @@ const Extraction = () => {
       direct: false,
       active: false,
       whatsapp_msg: message?.message || "",
-      property_type: 0,
-      tag: 0,
-      furnish_type: 0,
-      location: 0,
+      property_type: null,
+      tag: null,
+      furnish_type: null,
+      location: null,
       egp_price: "0",
       usd_price: "0",
       no_bedroom: 0,
@@ -94,7 +143,7 @@ const Extraction = () => {
       whatsapp_msg: message?.message || "",
       property_type_ids: [],
       tag: 0,
-      furnish_type: 0,
+      furnish_type: null,
       exact_location_ids: [],
       suggested_location_ids: [],
       exact_locations_text: {},
@@ -118,26 +167,82 @@ const Extraction = () => {
     mutationFn: (data: InventoryPayload) => saveInventory(data),
     onSuccess: () => {
       toast({ title: "Success", description: "Inventory saved successfully!" });
-      navigate("/");
+      // navigate("/");
     },
     onError: (error) => {
-      const err = error as AxiosError<{ message: string }>;
+      const err = error as AxiosError<{ furnish_type: string[] }>;
+      console.log(err);
+
       toast({
-        title: "Error",
-        description: err.response?.data?.message || "Failed to save",
-        variant: "destructive",
+        title: "Error Saving Inventory",
+        description: err.response?.data?.furnish_type[0],
       });
     },
+
+    //   if (isAxiosError(error) && error.response?.data) {
+    //     const errorData = error.response.data;
+
+    //     if (errorData.detail) {
+    //       toast({
+    //         title: "Operation Failed",
+    //         description: errorData.detail,
+    //         variant: "destructive",
+    //       });
+    //       return;
+    //     }
+
+    //     if (Array.isArray(errorData.non_field_errors)) {
+    //       toast({
+    //         title: "Error",
+    //         description: errorData.non_field_errors[0],
+    //         variant: "destructive",
+    //       });
+    //       return;
+    //     }
+    //     const apiErrors = errorData as Record<string, string[]>;
+    //     let firstErrorMessage = "";
+
+    //     Object.keys(apiErrors).forEach((key, index) => {
+    //       const msg = apiErrors[key][0];
+
+    //       if (index === 0) firstErrorMessage = `${key}: ${msg}`;
+
+    //       if (formType === "inventory") {
+    //         inventoryForm.setError(key as any, {
+    //           type: "server",
+    //           message: msg,
+    //         });
+    //       } else {
+    //         requestForm.setError(key as any, { type: "server", message: msg });
+    //       }
+    //     });
+
+    //     toast({
+    //       title: "Validation Error",
+    //       description: firstErrorMessage
+    //         ? `${firstErrorMessage} (and others)`
+    //         : "Please check the form fields.",
+    //       variant: "destructive",
+    //     });
+    //   } else {
+    //     toast({
+    //       title: "Network Error",
+    //       description: "Something went wrong. Please check your connection.",
+    //       variant: "destructive",
+    //     });
+    //   }
+    // },
   });
 
   const requestMutation = useMutation({
     mutationFn: (data: RequestPayload) => saveRequest(data),
     onSuccess: () => {
       toast({ title: "Success", description: "Request saved successfully!" });
-      navigate("/");
+      // navigate("/");
     },
     onError: (error) => {
       const err = error as AxiosError<{ message: string }>;
+      console.log(err);
       toast({
         title: "Error",
         description: err.response?.data?.message || "Failed to save",
@@ -147,20 +252,24 @@ const Extraction = () => {
   });
 
   const handleSaveInventory = (data: InventoryPayload) => {
-    if (!message) return;
+    if (!currentMessage) return;
     inventoryMutation.mutate({
       ...data,
+      phone: message.phone,
+      message_id: message.id,
     });
   };
 
   const handleSaveRequest = (data: RequestPayload) => {
-    if (!message) return;
+    if (!currentMessage) return;
     requestMutation.mutate({
       ...data,
+      phone: message.phone,
+      message_id: message.id,
     });
   };
 
-  if (!message) {
+  if (!currentMessage) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <Card className="p-8 text-center shadow-lg border">
@@ -172,6 +281,8 @@ const Extraction = () => {
   }
 
   const activeForm = formType === "inventory" ? inventoryForm : requestForm;
+
+  console.log(currentMessage);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
@@ -200,7 +311,7 @@ const Extraction = () => {
           <div className="w-full lg:w-7/12 flex flex-col gap-4">
             <Card className="bg-white border shadow-sm p-4 md:p-6">
               {formType === "inventory" ? (
-                <FormProvider {...inventoryForm}>
+                <FormProvider key={currentMessage.id} {...inventoryForm}>
                   <form
                     onSubmit={inventoryForm.handleSubmit(handleSaveInventory)}
                   >
@@ -225,7 +336,7 @@ const Extraction = () => {
                   </form>
                 </FormProvider>
               ) : (
-                <FormProvider {...requestForm}>
+                <FormProvider key={currentMessage.id} {...requestForm}>
                   <form onSubmit={requestForm.handleSubmit(handleSaveRequest)}>
                     <RequestForm
                       propertyTypes={propertyTypes}
@@ -260,7 +371,8 @@ const Extraction = () => {
               </div>
               <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                 <AIPanel
-                  message={message}
+                  key={currentMessage.id}
+                  message={currentMessage}
                   formType={formType}
                   onToggleType={() =>
                     setFormType((prev) =>
@@ -271,6 +383,12 @@ const Extraction = () => {
                   propertyTypes={propertyTypes}
                   furnishedTypes={furnishedTypes}
                   tags={tags}
+                  onNext={() => handleNavigateMessage("next")}
+                  onPrev={() => handleNavigateMessage("prev")}
+                  hasNext={hasNext}
+                  hasPrev={hasPrev}
+                  currentIndex={currentIndex + 1}
+                  total={totalMessages}
                 />
               </div>
             </Card>

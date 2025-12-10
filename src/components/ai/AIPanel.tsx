@@ -18,6 +18,7 @@ import type {
   Tag,
 } from "@/types";
 import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import {
   ArrowRightLeft,
   CheckCircle2,
@@ -28,6 +29,8 @@ import {
   Search,
   Sparkles,
   User,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -39,6 +42,12 @@ interface AIPanelProps {
   propertyTypes: PropertyType[];
   furnishedTypes: FurnishedType[];
   tags: Tag[];
+  onNext: () => void;
+  onPrev: () => void;
+  hasNext: boolean;
+  hasPrev: boolean;
+  currentIndex: number;
+  total: number;
 }
 
 interface FuzzyPayload {
@@ -62,6 +71,12 @@ const AIPanel = ({
   propertyTypes,
   furnishedTypes,
   tags,
+  onNext,
+  onPrev,
+  hasNext,
+  hasPrev,
+  currentIndex,
+  total,
 }: AIPanelProps) => {
   const [msgText, setMsgText] = useState(message.message);
 
@@ -129,7 +144,7 @@ const AIPanel = ({
         }, 500);
       }
     },
-    onError: () => {
+    onError: (err) => {
       toast({ title: "AI Extraction Failed", variant: "destructive" });
     },
   });
@@ -147,8 +162,15 @@ const AIPanel = ({
     onSuccess: (data) => {
       setFuzzyResults(data);
     },
-    onError: () => {
-      toast({ title: "Fuzzy Search Failed", variant: "destructive" });
+    onError: (err) => {
+      const error = err as AxiosError<{
+        error: { non_field_errors: string[] };
+      }>;
+      toast({
+        title: "Error with Fuzzy Search",
+        description: error?.response?.data?.error.non_field_errors[0],
+        variant: "destructive",
+      });
     },
   });
 
@@ -366,6 +388,32 @@ const AIPanel = ({
     <div className="flex flex-col gap-6">
       {/* 1. Header Info */}
       <div className="bg-slate-50 border rounded-lg p-4 space-y-3">
+        <div className="flex items-center justify-between border-b pb-3 mb-2 border-slate-200">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onPrev}
+            disabled={!hasPrev}
+            className="h-8 w-8 p-0 hover:bg-slate-200"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+
+          <span className="text-xs font-semibold text-slate-500">
+            Message {currentIndex} of {total}
+          </span>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onNext}
+            disabled={!hasNext}
+            className="h-8 w-8 p-0 hover:bg-slate-200"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="space-y-1">
             <span className="text-xs text-muted-foreground flex items-center gap-1">
