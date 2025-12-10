@@ -37,12 +37,26 @@ export interface FurnishedType {
   name: string;
 }
 
-// Location from autocomplete
+// Location from fuzzy match response
 export interface Location {
   id: number;
   name: string;
   full_address: string;
 }
+
+// Location search result from autocomplete
+export interface LocationSearchResult {
+  id: number;
+  full_address: string;
+  type: string; // "area", "compound", etc.
+  lat: number;
+  lng: number;
+  radius: number;
+  parent_id: number | null;
+  name: string;
+}
+
+
 
 // Fuzzy match result item
 export interface FuzzyMatchItem {
@@ -147,7 +161,7 @@ export interface AIRequestResponse {
   fuzzy_status?: string;
   type?: string;
   tag?: string; // String
-  exact_locations_text?: Record<string, string> | string[]; 
+  exact_locations_text?: Record<string, string> | string[];
   exact_location_ids?: number[];
   suggested_locations_text?: Record<string, string> | string[];
   suggested_location_ids?: number[];
@@ -204,6 +218,7 @@ export interface InventoryPayload {
   reference_id?: string;
   user_id?: number;
   message_id?: number;
+  phone?: string;
 
   source: string;
   type: string; // "for_rent" | "for_sale"
@@ -212,7 +227,7 @@ export interface InventoryPayload {
   property_type: number;
   tag: number;
   furnish_type: number;
-  location: number;
+  location: number | null;
   // agent_assigned: number;
 
   // Specs
@@ -251,6 +266,9 @@ export interface InventoryPayload {
 }
 
 export interface RequestPayload {
+  phone?: string;
+  message_id?: number;
+
   duration_period?: string;
 
   source: string;

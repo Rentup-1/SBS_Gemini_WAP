@@ -9,6 +9,7 @@ import type {
   AIRequestResponse,
   InventoryPayload,
   RequestPayload,
+  LocationSearchResult,
 } from "@/types";
 
 // Fetch all tags
@@ -30,10 +31,21 @@ export const getFurnishedTypes = async (): Promise<FurnishedType[]> => {
 };
 
 // Location autocomplete
-export const searchLocations = async (query: string): Promise<Location[]> => {
-  const response = await coreApi.get(
-    `/locations/autocomplete/?q=${encodeURIComponent(query)}`
+export const searchLocationsApi = async (
+  query: string
+): Promise<LocationSearchResult[]> => {
+  if (!query || query.length < 2) return [];
+
+  const response = await coreApi.get<LocationSearchResult[]>(
+    "/locations/autocomplete/",
+    {
+      params: {
+        q: query,
+        "X-Localization": "en",
+      },
+    }
   );
+
   return response.data;
 };
 

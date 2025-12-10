@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { PropertyType, Tag, FurnishedType, Message } from "@/types";
+import { LocationSearch } from "../common/LocationSearch";
 
 interface InventoryFormProps {
   propertyTypes: PropertyType[];
@@ -26,12 +27,20 @@ const InventoryForm = ({
   message,
 }: InventoryFormProps) => {
   const { register, control, watch, setValue } = useFormContext();
-  const locationName = watch("locations_text_display"); // Temporary field for display
+  const locationName = watch("location_name");
+  // const locationName = watch("locations_text_display"); // Temporary field for display
   const inventoryOptions = watch("inventory_options") || {};
   const optionsKeys = Object.keys(inventoryOptions);
 
   return (
     <div className="space-y-6 p-1">
+      {/* header */}
+      <div className="space-y-1.5">
+        <h4 className="text-lg text-center font-semibold text-blue-600">
+          Inventory Details
+        </h4>
+      </div>
+
       {/* 1. Core Details */}
       <div className="space-y-4">
         <h4 className="text-sm font-semibold text-slate-800 border-b pb-2">
@@ -58,7 +67,7 @@ const InventoryForm = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="for_rent">For Rent</SelectItem>
-                    <SelectItem value="for_sale">For Sale</SelectItem>
+                    <SelectItem value="sell">For Sale</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -305,12 +314,20 @@ const InventoryForm = ({
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label>Location (Selected via AI Panel)</Label>
-          <Input
-            value={locationName || ""}
-            readOnly
-            className="bg-green-50 border-green-200 text-green-800 font-medium"
-            placeholder="Please select a location from the right panel"
+          <Label>Location (Selected via AI Panel or search manually)</Label>
+          <LocationSearch
+            defaultValue={locationName}
+            onSelect={(loc) => {
+              setValue("location", loc.id, {
+                shouldValidate: true,
+                shouldDirty: true,
+              });
+              setValue("location_name", loc.name);
+            }}
+          />
+          <input
+            type="hidden"
+            {...register("location", { required: "Location is required" })}
           />
         </div>
       </div>
