@@ -67,7 +67,7 @@ const InventoryForm = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="for_rent">For Rent</SelectItem>
-                    <SelectItem value="sell">For Sale</SelectItem>
+                    <SelectItem value="for_sale">For Sale</SelectItem>
                   </SelectContent>
                 </Select>
               )}

@@ -31,7 +31,14 @@ import type { Message } from "@/types";
 
 const ITEMS_PER_PAGE = 15;
 
-type SortKey = "id" | "date" | "username" | "phone" | "message" | "type";
+type SortKey =
+  | "id"
+  | "date"
+  | "username"
+  | "phone"
+  | "message"
+  | "type"
+  | "status";
 
 interface SortConfig {
   key: SortKey;
@@ -57,6 +64,7 @@ const Dashboard = () => {
     phone: "",
     message: "",
     type: "",
+    status: "",
   });
 
   const {
@@ -83,15 +91,17 @@ const Dashboard = () => {
       case "id":
         return msg.id;
       case "date":
-        return new Date(msg.sent_at || msg.created_at).getTime();
+        return new Date(msg.timestamp).getTime();
       case "username":
         return (msg.username || "").toLowerCase();
       case "phone":
-        return (msg.phone || "").replace(/\D/g, "");
+        return (msg.phone_number || "").replace(/\D/g, "");
       case "message":
-        return (msg.message || "").toLowerCase();
+        return (msg.content || "").toLowerCase();
       case "type":
         return (msg.type || "").toLowerCase();
+      case "status":
+        return (msg.listing_status || "").toLowerCase();
       default:
         return "";
     }
@@ -109,18 +119,27 @@ const Dashboard = () => {
           .toLowerCase()
           .includes(filters.username.toLowerCase());
       const matchPhone =
-        !filters.phone || (msg.phone || "").includes(filters.phone);
+        !filters.phone || (msg.phone_number || "").includes(filters.phone);
       const matchMessage =
         !filters.message ||
-        (msg.message || "")
+        (msg.content || "")
           .toLowerCase()
           .includes(filters.message.toLowerCase());
       const matchType =
         !filters.type ||
         (msg.type || "").toLowerCase().includes(filters.type.toLowerCase());
-
+      const matchStatus =
+        !filters.status ||
+        (msg.listing_status || "")
+          .toLowerCase()
+          .includes(filters.status.toLowerCase());
       return (
-        matchId && matchUsername && matchPhone && matchMessage && matchType
+        matchId &&
+        matchUsername &&
+        matchPhone &&
+        matchMessage &&
+        matchType &&
+        matchStatus
       );
     });
 
@@ -267,7 +286,15 @@ const Dashboard = () => {
                 onChange={(e) =>
                   setFilters((f) => ({ ...f, message: e.target.value }))
                 }
-                className="h-9 text-sm col-span-2"
+                className="h-9 text-sm "
+              />
+              <Input
+                placeholder="Filter Status..."
+                value={filters.status}
+                onChange={(e) =>
+                  setFilters((f) => ({ ...f, status: e.target.value }))
+                }
+                className="h-9 text-sm"
               />
               <Input
                 placeholder="Filter Type..."
@@ -319,6 +346,14 @@ const Dashboard = () => {
                       </TableHead>
                       <TableHead
                         className="w-[100px] cursor-pointer hover:bg-muted transition-colors"
+                        onClick={() => handleSort("status")}
+                      >
+                        <div className="flex items-center">
+                          Status <SortIcon columnKey="status" />
+                        </div>
+                      </TableHead>
+                      <TableHead
+                        className="w-[100px] cursor-pointer hover:bg-muted transition-colors"
                         onClick={() => handleSort("type")}
                       >
                         <div className="flex items-center">
@@ -356,22 +391,34 @@ const Dashboard = () => {
                             {msg.id}
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">
-                            {formatDate(msg.created_at || msg.sent_at)}
+                            {formatDate(msg.timestamp)}
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col">
                               <span className="font-medium text-sm">
-                                {msg?.user?.name || msg?.username || "Unknown"}
+                                {msg?.username || "Unknown"}
                               </span>
                               <span className="text-xs text-muted-foreground">
-                                {msg.phone}
+                                {msg.phone_number}
                               </span>
                             </div>
                           </TableCell>
                           <TableCell className="max-w-[400px]">
-                            <p className="text-sm truncate" title={msg.message}>
-                              {msg.message}
+                            <p className="text-sm truncate" title={msg.content}>
+                              {msg.content}
                             </p>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                msg.listing_status === "not_listed"
+                                  ? "destructive"
+                                  : "default"
+                              }
+                              className="capitalize"
+                            >
+                              {msg.listing_status || "unknown"}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <Badge

@@ -105,7 +105,7 @@ const Extraction = () => {
       urgent: false,
       direct: false,
       active: false,
-      whatsapp_msg: message?.message || "",
+      whatsapp_msg: message?.content || "",
       property_type: null,
       tag: null,
       furnish_type: null,
@@ -140,7 +140,7 @@ const Extraction = () => {
       deal_type: "Side-by-Side",
       urgent: true,
       direct: true,
-      whatsapp_msg: message?.message || "",
+      whatsapp_msg: message?.content || "",
       property_type_ids: [],
       tag: 0,
       furnish_type: null,
@@ -255,7 +255,7 @@ const Extraction = () => {
     if (!currentMessage) return;
     inventoryMutation.mutate({
       ...data,
-      phone: message.phone,
+      phone: message.phone_number,
       message_id: message.id,
     });
   };
@@ -264,7 +264,7 @@ const Extraction = () => {
     if (!currentMessage) return;
     requestMutation.mutate({
       ...data,
-      phone: message.phone,
+      phone: message.phone_number,
       message_id: message.id,
     });
   };

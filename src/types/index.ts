@@ -1,20 +1,17 @@
 // Message from WhatsApp API
 export interface Message {
   id: number;
-  phone: string;
   username: string;
+  phone_number: string;
   type: "request" | "inventory" | string;
-  message: string;
-  status: string;
-  sent_at: string | null;
-  created_at: string;
-  media_urls?: string[];
+  content: string;
   source?: string;
-  user: {
-    id: number;
-    name: string;
-    phone: string;
-  };
+  listing_status: string;
+  timestamp?: string;
+  // sent_at?: string | null;
+  // created_at?: string;
+  // media_urls?: string[];
+  media_type?: string;
 }
 
 // Tags for categorization
@@ -55,8 +52,6 @@ export interface LocationSearchResult {
   parent_id: number | null;
   name: string;
 }
-
-
 
 // Fuzzy match result item
 export interface FuzzyMatchItem {

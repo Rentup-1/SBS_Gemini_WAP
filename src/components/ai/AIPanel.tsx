@@ -31,6 +31,11 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
+  Globe,
+  Globe2,
+  GlobeIcon,
+  Globe2Icon,
+  GlobeLock,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -78,7 +83,7 @@ const AIPanel = ({
   currentIndex,
   total,
 }: AIPanelProps) => {
-  const [msgText, setMsgText] = useState(message.message);
+  const [msgText, setMsgText] = useState(message.content);
 
   const [aiResponse, setAiResponse] = useState<AIProcessResponse | null>(null);
   const [fuzzyResults, setFuzzyResults] = useState<FuzzyResponse | null>(null);
@@ -414,7 +419,8 @@ const AIPanel = ({
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        {/* <div className="grid grid-cols-3 gap-3 text-sm"> */}
+        <div className="flex align-center justify-between text-sm">
           <div className="space-y-1">
             <span className="text-xs text-muted-foreground flex items-center gap-1">
               <User className="w-3 h-3" /> Username
@@ -427,7 +433,15 @@ const AIPanel = ({
             <span className="text-xs text-muted-foreground flex items-center gap-1">
               <Phone className="w-3 h-3" /> Phone
             </span>
-            <p className="font-medium text-slate-800">{message.phone}</p>
+            <p className="font-medium text-slate-800">{message.phone_number}</p>
+          </div>
+          <div className="space-y-1">
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Globe className="w-3 h-3" />  Status
+            </span>
+            <p className={` ${message.listing_status === "not_listed" ? "text-red-600" : "text-green-600" } font-medium text-slate-800`}>
+              {message.listing_status || "Unknown"}
+            </p>
           </div>
         </div>
       </div>
@@ -449,7 +463,7 @@ const AIPanel = ({
             WAP Message (Editable)
           </Label>
           <span className="text-[10px] text-muted-foreground">
-            {new Date(message.created_at).toLocaleDateString()}
+            {new Date(message.timestamp).toLocaleDateString()}
           </span>
         </div>
         <Textarea
