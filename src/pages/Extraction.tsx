@@ -5,7 +5,7 @@ import {
   saveInventory,
   saveRequest,
 } from "@/api/core";
-import AIPanel from "@/components/ai/AIPanel";
+import AIPanel from "@/components/ai/AIPanel-v2";
 import InventoryForm from "@/components/forms/InventoryForm";
 import RequestForm from "@/components/forms/RequestForm";
 import { Button } from "@/components/ui/button";
@@ -61,7 +61,7 @@ const Extraction = () => {
           fullMessage: nextMessage,
           contextList: state.contextList,
         },
-        replace: true, 
+        replace: true,
       });
       // scroll to the top of the page
       window.scrollTo(0, 0);
