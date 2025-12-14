@@ -8,14 +8,14 @@ import { useEffect, useState } from "react";
 interface UseLocationMatcherProps {
   form;
   formType: "inventory" | "request";
-  aiResponse: AIProcessResponse | null; 
+  aiResponse: AIProcessResponse | null;
 }
 interface FuzzyPayload {
   exact_locations: string[];
   suggested_locations: string[];
   parent_context: string;
 }
-
+type ExtendedFuzzyItem = FuzzyMatchItem & { type?: "exact" | "suggested" };
 export const useLocationMatcher = ({
   form,
   formType,
@@ -26,9 +26,9 @@ export const useLocationMatcher = ({
   const [suggestedLocs, setSuggestedLocs] = useState<string[]>([]);
   const [parentContext, setParentContext] = useState("");
   const [fuzzyResults, setFuzzyResults] = useState<FuzzyResponse | null>(null);
-  const [selectedLocations, setSelectedLocations] = useState<FuzzyMatchItem[]>(
-    []
-  );
+  const [selectedLocations, setSelectedLocations] = useState<
+    ExtendedFuzzyItem[]
+  >([]);
 
   // Effect to parse locations from AI Response automatically
   useEffect(() => {
@@ -84,7 +84,33 @@ export const useLocationMatcher = ({
       const res = await coreApi.post<FuzzyResponse>("/fuzzy/match/", payload);
       return res.data;
     },
-    onSuccess: (data) => setFuzzyResults(data),
+    onSuccess: (data) => {
+      setFuzzyResults(data);
+      
+      if (formType === "request") {
+        // set selected locations
+        const exactItems = (data.exact_matches || []).map((item) => ({
+          ...item,
+          type: "exact" as const,
+        }));
+
+        const suggestedItems = (data.suggested_matches || []).map((item) => ({
+          ...item,
+          type: "suggested" as const,
+        }));
+
+        // merge exact and suggested items together and set as selected locations
+        setSelectedLocations([...exactItems, ...suggestedItems]);
+      } else if (formType === "inventory") {
+        if (data.exact_matches && data.exact_matches.length > 0) {
+          const firstExact = {
+            ...data.exact_matches[0],
+            type: "exact" as const,
+          };
+          setSelectedLocations([firstExact]);
+        }
+      }
+    },
     onError: (err) => {
       const error = err as AxiosError<{
         error: {
@@ -101,7 +127,7 @@ export const useLocationMatcher = ({
     },
   });
 
-  const toggleLocation = (item: FuzzyMatchItem) => {
+  const toggleLocation = (item: ExtendedFuzzyItem) => {
     if (formType === "inventory") {
       setSelectedLocations([item]);
     } else {
@@ -117,21 +143,55 @@ export const useLocationMatcher = ({
   };
 
   const confirmSelection = () => {
+    if (selectedLocations.length === 0) return;
+
     if (formType === "inventory") {
-      if (selectedLocations.length > 0) {
-        form.setValue("location", selectedLocations[0].matched_id);
-        form.setValue("location_name", selectedLocations[0].name_en);
-        toast({
-          title: "Location Set",
-          description: selectedLocations[0].name_en,
-        });
-      }
+      // Inventory: Single Location
+      const loc = selectedLocations[0];
+      form.setValue("location", loc.matched_id);
+      form.setValue("locations_text", [loc.name_en]);
+      form.setValue("location_name", loc.name_en);
+      toast({ title: "Location Set", description: loc.name_en });
     } else {
-      const ids = selectedLocations.map((l) => l.matched_id);
-      const names = selectedLocations.map((l) => l.name_en);
-      form.setValue("exact_location_ids", ids);
-      form.setValue("location_names_display", names);
-      toast({ title: "Locations Set", description: `${ids.length} selected` });
+      // Request: Multi Location (Separated)
+
+      // 1. Filter Exact vs Suggested
+      const exactItems = selectedLocations.filter(
+        (l) => l.type === "exact" || !l.type
+      );
+      const suggestedItems = selectedLocations.filter(
+        (l) => l.type === "suggested"
+      );
+
+      // 2. Prepare IDs
+      const exactIds = exactItems.map((l) => l.matched_id);
+      const suggestedIds = suggestedItems.map((l) => l.matched_id);
+
+      // 3. Prepare Text Objects
+      // const exactTextObj = createLocationTextObj(exactItems);
+      const exactTextObj = exactItems.map((l) => l.name_en);
+      const suggestedTextObj = suggestedItems.map((l) => l.name_en);
+
+      // 4. Prepare UI Names
+      const allNames = selectedLocations.map((l) => l.name_en);
+
+      // --- Inject into Form ---
+
+      // Exact Fields
+      form.setValue("exact_location_ids", exactIds);
+      form.setValue("exact_locations_text", exactTextObj);
+
+      // Suggested Fields
+      form.setValue("suggested_location_ids", suggestedIds);
+      form.setValue("suggested_locations_text", suggestedTextObj);
+
+      // UI Display
+      form.setValue("location_names_display", allNames);
+
+      toast({
+        title: "Locations Set",
+        description: `${exactIds.length} Exact, ${suggestedIds.length} Suggested`,
+      });
     }
   };
 

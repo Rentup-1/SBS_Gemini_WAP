@@ -29,7 +29,7 @@ const InventoryForm = ({
   const { register, control, watch, setValue } = useFormContext();
   const locationName = watch("location_name");
   // const locationName = watch("locations_text_display"); // Temporary field for display
-  const inventoryOptions = watch("inventory_options") || {};
+  const inventoryOptions = watch("inventory_options") || {};  
   const optionsKeys = Object.keys(inventoryOptions);
 
   return (
@@ -201,6 +201,7 @@ const InventoryForm = ({
                     <SelectItem value="MONTHLY">Monthly</SelectItem>
                     <SelectItem value="DAILY">Daily</SelectItem>
                     <SelectItem value="CASH">Cash</SelectItem>
+                    <SelectItem value="YEARLY">Yearly</SelectItem>
                     <SelectItem value="INSTALLMENT">Installment</SelectItem>
                   </SelectContent>
                 </Select>
@@ -231,7 +232,7 @@ const InventoryForm = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="MONTHLY">Months</SelectItem>
-                    <SelectItem value="YEARLY">Years</SelectItem>
+                    <SelectItem value="YEARS">Years</SelectItem>
                     <SelectItem value="DAILY">Days</SelectItem>
                   </SelectContent>
                 </Select>

@@ -1,14 +1,13 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { UseFormReturn } from "react-hook-form";
 import { processInventory, processRequest } from "@/api/core";
 import { toast } from "@/hooks/use-toast";
 import type {
   AIProcessResponse,
-  PropertyType,
   FurnishedType,
+  PropertyType,
   Tag,
 } from "@/types";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 
 interface UseAIParserProps {
   initialMessage: string;
@@ -32,10 +31,13 @@ export const useAIParser = ({
 
   const autoFillForm = (data: AIProcessResponse) => {
     // 1. Budget & Price
-    if (data.egp_price) form.setValue("egp_price", String(data.egp_price));
-    if (data.usd_price) form.setValue("usd_price", String(data.usd_price));
-    if (data.egp_budget) form.setValue("egp_budget", String(data.egp_budget));
-    if (data.usd_budget) form.setValue("usd_budget", String(data.usd_budget));
+    if (formType === "inventory") {
+      if (data.egp_price) form.setValue("egp_price", String(data.egp_price));
+      if (data.usd_price) form.setValue("usd_price", String(data.usd_price));
+    } else if (formType === "request") {
+      if (data.egp_budget) form.setValue("egp_budget", String(data.egp_budget));
+      if (data.usd_budget) form.setValue("usd_budget", String(data.usd_budget));
+    }
 
     // 2. BUA & Specs
     if (data.bua) form.setValue("bua", Number(data.bua));
@@ -93,8 +95,14 @@ export const useAIParser = ({
       form.setValue("transaction_type", data.transaction_type.toUpperCase());
     if (data.duration_period)
       form.setValue("duration_period", String(data.duration_period));
-    if (data.duration_type)
-      form.setValue("duration_type", data.duration_type.toUpperCase());
+    if (data.duration_type) {
+      const lowerType = data.duration_type.toLowerCase();
+      if (lowerType.includes("yearly") || lowerType.includes("year")) {
+        form.setValue("duration_type", "YEARS");
+      } else {
+        form.setValue("duration_type", data.duration_type.toUpperCase());
+      }
+    }
     if (data.installment_period)
       form.setValue("installment_period", String(data.installment_period));
     if (data.installment_type)
@@ -102,7 +110,9 @@ export const useAIParser = ({
 
     // 7. Deal Type & Meta
     if (data.deal_deal_type) {
-      form.setValue("deal_deal_type", data.deal_deal_type);
+      if (formType === "request") {
+        form.setValue("deal_deal_type", data.deal_deal_type);
+      }
       form.setValue("deal_type", data.deal_deal_type);
     }
     if (data.listing_code) form.setValue("listing_code", data.listing_code);
@@ -125,29 +135,92 @@ export const useAIParser = ({
     }
 
     // 9. Checkboxes
-    if (data.urgent) form.setValue("urgent", true);
-    if (data.direct) form.setValue("direct", true);
-    if (data.active) form.setValue("active", true);
+    if (data.urgent === true) form.setValue("urgent", true);
+    if (data.direct === true) form.setValue("direct", true);
+    if (data.active === true) form.setValue("active", true);
 
     // 10. Options Parsing
-    const parseOptions = (optString: string) => {
-      if (!optString) return {};
-      return optString.split(",").reduce((acc, curr) => {
-        const key = curr.trim();
-        if (key) acc[key] = true;
-        return acc;
-      }, {} as Record<string, boolean>);
+    // Helper function to convert options (Array/String) to UI Object format
+    const normalizeOptions = (
+      input: string | string[] | undefined
+    ): Record<string, boolean> => {
+      if (!input) return {};
+
+      // Case 1: If it's an Array (e.g. ["air conditioning", "tv"])
+      if (Array.isArray(input)) {
+        return input.reduce((acc, curr) => {
+          if (typeof curr === "string") {
+            acc[curr.trim()] = true;
+          }
+          return acc;
+        }, {} as Record<string, boolean>);
+      }
+
+      // Case 2: If it's a comma-separated String (e.g. "air conditioning, tv")
+      if (typeof input === "string") {
+        return input.split(",").reduce((acc, curr) => {
+          const key = curr.trim();
+          if (key) acc[key] = true;
+          return acc;
+        }, {} as Record<string, boolean>);
+      }
+
+      return {};
     };
+
     if (
       formType === "inventory" &&
       typeof data.inventory_options === "string"
     ) {
-      form.setValue("inventory_options", parseOptions(data.inventory_options));
-    } else if (
-      formType === "request" &&
-      typeof data.request_options === "string"
-    ) {
-      form.setValue("request_options_ui", parseOptions(data.request_options));
+      form.setValue(
+        "inventory_options",
+        normalizeOptions(data.inventory_options)
+      );
+    } else if (formType === "request" && data.request_options) {
+      form.setValue("request_options", normalizeOptions(data.request_options));
+    }
+
+    const normalizeToTextArray = (val) => {
+      if (!val) return [];
+      if (Array.isArray(val)) return val;
+      if (typeof val === "string") {
+        return val
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+      if (typeof val === "object") {
+        return Object.keys(val);
+      }
+      return [];
+    };
+
+    if (formType === "inventory") {
+      if (data.locations_text) {
+        form.setValue(
+          "locations_text",
+          normalizeToTextArray(data.locations_text)
+        );
+      }
+    } else {
+      // Request Logic (Arrays Always)
+      if (data.exact_locations_text) {
+        form.setValue(
+          "exact_locations_text",
+          normalizeToTextArray(data.exact_locations_text)
+        );
+      } else {
+        form.setValue("exact_locations_text", []);
+      }
+
+      if (data.suggested_locations_text) {
+        form.setValue(
+          "suggested_locations_text",
+          normalizeToTextArray(data.suggested_locations_text)
+        );
+      } else {
+        form.setValue("suggested_locations_text", []);
+      }
     }
   };
 

@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import type { PropertyType, Tag, FurnishedType, Message } from "@/types";
 import { LocationSearch } from "../common/LocationSearch";
+import { Separator } from "@radix-ui/react-separator";
 
 interface RequestFormProps {
   propertyTypes: PropertyType[];
@@ -32,9 +33,37 @@ const RequestForm = ({
 
   // Custom Logic for Multi-select Property Types
   const selectedPropTypes = watch("property_type_ids") || [];
-  const locationNames = watch("location_names_display") || [];
-  const locationIds = watch("exact_location_ids") || [];
 
+  const exactIds = watch("exact_location_ids") || [];
+  const rawExactNames = watch("exact_locations_text");
+  const exactNames = Array.isArray(rawExactNames) ? rawExactNames : [];
+  const suggestedIds = watch("suggested_location_ids") || [];
+  const rawSuggestedNames = watch("suggested_locations_text");
+  const suggestedNames = Array.isArray(rawSuggestedNames)
+    ? rawSuggestedNames
+    : [];
+  // Remove Exact Location and Suggested Location
+  const removeExactLocation = (index: number) => {
+    setValue(
+      "exact_locations_text",
+      exactNames.filter((_, i: number) => i !== index)
+    );
+    setValue(
+      "exact_location_ids",
+      exactIds.filter((_, i: number) => i !== index)
+    );
+  };
+  const removeSuggestedLocation = (index: number) => {
+    setValue(
+      "suggested_locations_text",
+      suggestedNames.filter((_, i: number) => i !== index)
+    );
+    setValue(
+      "suggested_location_ids",
+      suggestedIds.filter((_, i: number) => i !== index)
+    );
+  };
+  // Toggle Property Type
   const togglePropertyType = (id: number) => {
     const current = Array.isArray(selectedPropTypes) ? selectedPropTypes : [];
     if (current.includes(id))
@@ -45,20 +74,8 @@ const RequestForm = ({
     else setValue("property_type_ids", [...current, id]);
   };
 
-  const removeLocation = (index: number) => {
-    setValue(
-      "location_names_display",
-      locationNames.filter((_, i: number) => i !== index)
-    );
-    setValue(
-      "exact_location_ids",
-      locationIds.filter((_, i: number) => i !== index)
-    );
-    setValue("suggested_location_ids", []); // Clear suggested if removing manually to be safe
-  };
-
   // watch for request options
-  const requestOptions = watch("request_options_ui") || {};
+  const requestOptions = watch("request_options") || [];
   const optionsKeys = Object.keys(requestOptions);
 
   return (
@@ -240,6 +257,7 @@ const RequestForm = ({
                   <SelectContent>
                     <SelectItem value="MONTHLY">Monthly</SelectItem>
                     <SelectItem value="DAILY">Daily</SelectItem>
+                    <SelectItem value="YEARLY">Yearly</SelectItem>
                     <SelectItem value="CASH">Cash</SelectItem>
                     <SelectItem value="INSTALLMENT">Installment</SelectItem>
                   </SelectContent>
@@ -274,8 +292,8 @@ const RequestForm = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="MONTHLY">Months</SelectItem>
-                    <SelectItem value="YEARLY">Years</SelectItem>
                     <SelectItem value="DAILY">Days</SelectItem>
+                    <SelectItem value="YEARS">Years</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -355,59 +373,113 @@ const RequestForm = ({
           </div>
         </div>
 
-        <div className="space-y-2 mt-2">
-          <Label>Locations (Selected via AI Panel or search box below )</Label>
+        <Separator />
 
-          {/* Location Search Component */}
-          <LocationSearch
-            placeholder="+ Add location..."
-            defaultValue={locationNames.join(", ")}
-            onSelect={(loc) => {
-              // Check if location is already selected before adding to stop duplicates
-              if (!locationIds.includes(loc.id)) {
-                setValue("exact_location_ids", [...locationIds, loc.id], {
-                  shouldDirty: true,
-                  shouldValidate: true,
-                });
-                setValue("location_names_display", [
-                  ...locationNames,
-                  loc.name,
-                ]);
-              }
-            }}
-          />
+        {/* location search */}
 
-          {/* Selected Locations Display */}
-          <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-white min-h-[42px]">
-            {locationNames.length === 0 ? (
-              <span className="text-xs text-muted-foreground self-center px-2">
-                No locations selected.
-              </span>
-            ) : (
-              locationNames.map((name: string, idx: number) => (
-                <Badge
-                  key={idx}
-                  variant="secondary"
-                  className="gap-1 pr-1 bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
-                >
-                  {name}
-                  <div
-                    className="hover:bg-red-200 rounded-full p-0.5 cursor-pointer transition-colors"
-                    onClick={() => removeLocation(idx)}
+        <div className="space-y-4">
+          <h3 className="font-medium text-sm text-gray-900">Locations</h3>
+
+          {/* 1. Exact Locations Section */}
+          <div className="space-y-2 p-3 border rounded-md bg-green-50/30 border-green-100">
+            {/* <FormLabel className="text-green-800">Exact Locations</FormLabel> */}
+
+            {/* Search Input for Exact */}
+            <LocationSearch
+              placeholder="+ Add Exact Location..."
+              onSelect={(loc) => {
+                if (!exactIds.includes(loc.id)) {
+                  setValue("exact_location_ids", [...exactIds, loc.id], {
+                    shouldDirty: true,
+                  });
+                  setValue("exact_locations_text", [...exactNames, loc.name]);
+                }
+              }}
+            />
+
+            {/* Badges for Exact */}
+            <div className="flex flex-wrap gap-2 min-h-[30px]">
+              {exactNames.length === 0 ? (
+                <span className="text-xs text-muted-foreground py-1">
+                  No exact locations selected.
+                </span>
+              ) : (
+                exactNames.map((name: string, idx: number) => (
+                  <Badge
+                    key={`exact-${idx}`}
+                    variant="secondary"
+                    className="bg-green-100 text-green-800 hover:bg-green-200 gap-1 pr-1"
                   >
-                    <X className="w-3 h-3 text-muted-foreground hover:text-red-600" />
-                  </div>
-                </Badge>
-              ))
-            )}
+                    {name}
+                    <div
+                      className="hover:bg-green-300 rounded-full p-0.5 cursor-pointer"
+                      onClick={() => removeExactLocation(idx)}
+                    >
+                      <X className="w-3 h-3" />
+                    </div>
+                  </Badge>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* 2. Suggested Locations Section */}
+          <div className="space-y-2 p-3 border rounded-md bg-amber-50/30 border-amber-100">
+            {/* <FormLabel className="text-amber-800">
+              Suggested Locations
+            </FormLabel> */}
+
+            {/* Search Input for Suggested */}
+            <LocationSearch
+              placeholder="+ Add Suggested Location..."
+              onSelect={(loc) => {
+                if (!suggestedIds.includes(loc.id)) {
+                  setValue(
+                    "suggested_location_ids",
+                    [...suggestedIds, loc.id],
+                    { shouldDirty: true }
+                  );
+                  setValue("suggested_locations_text", [
+                    ...suggestedNames,
+                    loc.name,
+                  ]);
+                }
+              }}
+            />
+
+            {/* Badges for Suggested */}
+            <div className="flex flex-wrap gap-2 min-h-[30px]">
+              {suggestedNames.length === 0 ? (
+                <span className="text-xs text-muted-foreground py-1">
+                  No suggested locations selected.
+                </span>
+              ) : (
+                suggestedNames.map((name: string, idx: number) => (
+                  <Badge
+                    key={`sugg-${idx}`}
+                    variant="secondary"
+                    className="bg-amber-100 text-amber-800 hover:bg-amber-200 gap-1 pr-1"
+                  >
+                    {name}
+                    <div
+                      className="hover:bg-amber-300 rounded-full p-0.5 cursor-pointer"
+                      onClick={() => removeSuggestedLocation(idx)}
+                    >
+                      <X className="w-3 h-3" />
+                    </div>
+                  </Badge>
+                ))
+              )}
+            </div>
           </div>
         </div>
+        <Separator />
       </div>
       {/* Amenities & Options (UI Only Section) */}
       {optionsKeys.length > 0 && (
         <div className="space-y-4">
           <h4 className="text-sm font-semibold text-slate-800 border-b pb-2">
-            Requested Options (UI View Only)
+            Requested Options
           </h4>
           <div className="space-y-2">
             <Label className="text-sm font-medium">Detected Options</Label>
@@ -418,7 +490,7 @@ const RequestForm = ({
                   className="flex items-center space-x-2 bg-slate-50 px-3 py-2 rounded-md border border-slate-200"
                 >
                   <Controller
-                    name={`request_options_ui.${key}`}
+                    name={`request_options.${key}`}
                     control={control}
                     render={({ field }) => (
                       <Checkbox
@@ -437,10 +509,10 @@ const RequestForm = ({
                 </div>
               ))}
             </div>
-            <p className="text-[10px] text-muted-foreground">
+            {/* <p className="text-[10px] text-muted-foreground">
               * These options are extracted for reference but are not currently
               sent to the database.
-            </p>
+            </p> */}
           </div>
         </div>
       )}
@@ -450,27 +522,37 @@ const RequestForm = ({
         <h4 className="text-sm font-semibold text-slate-800 border-b pb-2">
           Assignment & Status
         </h4>
-        <div className="space-y-1.5">
-          <Label>Deal Type</Label>
-          <Controller
-            name="deal_type"
-            control={control}
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Side-by-Side">Side-by-Side</SelectItem>
-                  <SelectItem value="Direct">Direct</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label>Deal Type</Label>
+            <Controller
+              name="deal_type"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Side-by-Side">Side-by-Side</SelectItem>
+                    <SelectItem value="Direct">Direct</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Listing Code</Label>
+            <Input {...register("listing_code")} placeholder="Optional" />
+          </div>
         </div>
         <div className="space-y-1.5">
           <Label>WhatsApp Message</Label>
           <Textarea {...register("whatsapp_msg")} className="h-16" />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Additional Notes</Label>
+          <Textarea {...register("additional_notes")} className="h-16" />
         </div>
 
         <div className="flex gap-6 pt-2">
@@ -504,6 +586,22 @@ const RequestForm = ({
             />
             <label htmlFor="direct" className="text-sm font-medium">
               Direct
+            </label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Controller
+              name="active"
+              control={control}
+              render={({ field }) => (
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  id="active"
+                />
+              )}
+            />
+            <label htmlFor="active" className="text-sm font-medium">
+              Active
             </label>
           </div>
         </div>

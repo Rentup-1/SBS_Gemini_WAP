@@ -63,7 +63,7 @@ export const AILocationManager = ({
             value={inputs.exactLocs.join(", ")}
             onChange={(e) =>
               inputs.setExactLocs(
-                e.target.value.split(",").map((s) => s.trim())
+                e.target.value.split(",")
               )
             }
             className="bg-white h-8 text-sm"
@@ -73,7 +73,7 @@ export const AILocationManager = ({
             value={inputs.suggestedLocs.join(", ")}
             onChange={(e) =>
               inputs.setSuggestedLocs(
-                e.target.value.split(",").map((s) => s.trim())
+                e.target.value.split(",")
               )
             }
             className="bg-white h-8 text-sm"
@@ -176,19 +176,18 @@ export const AILocationManager = ({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 pl-2">
-                      {match.type === "exact" && (
-                        <Badge
-                          variant="default"
-                          className="text-[9px] h-4 px-1 bg-green-600"
-                        >
-                          Exact
-                        </Badge>
-                      )}
+                      <Badge
+                        variant="default"
+                        className="text-[9px] h-4 px-1 bg-green-600"
+                      >
+                        {match.type === "exact" ? "Exact" : "Suggested"}
+                      </Badge>
+
                       <Badge
                         variant={match.score > 0.9 ? "default" : "secondary"}
                         className="text-[10px] h-5 px-1 min-w-[35px] justify-center"
                       >
-                        {Math.round(match.score * 100)}%
+                        {Math.round(match.score)}%
                       </Badge>
                     </div>
                   </div>
