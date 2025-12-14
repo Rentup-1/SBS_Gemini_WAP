@@ -1,12 +1,10 @@
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { getMessages } from "@/api/messages";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { UserStatusCell } from "@/components/dashboard/UserStatusCell";
+import { WhatsAppReplyDialog } from "@/components/dialogs/WhatsAppReplyDialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -15,21 +13,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useAuth } from "@/contexts/AuthContext";
+import type { Message } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import {
-  Sparkles,
-  LogOut,
-  RefreshCw,
-  MessageSquare,
-  Building2,
-  Loader2,
   ArrowUpDown,
+  Building2,
   ChevronLeft,
   ChevronRight,
+  Loader2,
+  LogOut,
+  MessageSquare,
+  RefreshCw,
+  Reply,
+  Sparkles,
 } from "lucide-react";
-import { format } from "date-fns";
-import type { Message } from "@/types";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const ITEMS_PER_PAGE = 15;
+const ITEMS_PER_PAGE = 20;
 
 type SortKey =
   | "id"
@@ -48,6 +51,18 @@ interface SortConfig {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { logout, user } = useAuth();
+
+  const [replyState, setReplyState] = useState<{
+    open: boolean;
+    phone: string | null;
+  }>({
+    open: false,
+    phone: null,
+  });
+
+  const handleOpenReply = (phone: string) => {
+    setReplyState({ open: true, phone });
+  };
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -199,6 +214,18 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* --- Reuse the Reply Dialog --- */}
+      <WhatsAppReplyDialog
+        open={replyState.open}
+        onOpenChange={(isOpen) =>
+          setReplyState((prev) => ({ ...prev, open: isOpen }))
+        }
+        phoneNumber={replyState.phone}
+        defaultMessage={
+          // Optional: Customize message based on context if needed
+          `Welcome to SBS Brokerz! \nPlease complete your registration here: \nhttps://sbs-brokerz.com/register?phone=${replyState.phone}`
+        }
+      />
       {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-10">
         <div className="container-fluid mx-auto px-4 py-4 flex items-center justify-between">
@@ -336,6 +363,8 @@ const Dashboard = () => {
                           User <SortIcon columnKey="username" />
                         </div>
                       </TableHead>
+                      {/* --- New Column Header --- */}
+                      <TableHead className="w-[120px]">User Status</TableHead>
                       <TableHead
                         className="cursor-pointer hover:bg-muted transition-colors"
                         onClick={() => handleSort("message")}
@@ -403,6 +432,15 @@ const Dashboard = () => {
                               </span>
                             </div>
                           </TableCell>
+                          {/* --- User Status Cell --- */}
+                          <TableCell>
+                            <UserStatusCell
+                              phone={msg.phone_number}
+                              onNewUserClick={() =>
+                                handleOpenReply(msg.phone_number)
+                              }
+                            />
+                          </TableCell>
                           <TableCell className="max-w-[400px]">
                             <p className="text-sm truncate" title={msg.content}>
                               {msg.content}
@@ -432,15 +470,33 @@ const Dashboard = () => {
                               {msg.type || "unknown"}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-center">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleExtract(msg)}
-                              className="hover:bg-primary/10 hover:text-primary"
-                            >
-                              <Sparkles className="w-4 h-4" />
-                            </Button>
+                          {/* --- Actions --- */}
+                          <TableCell>
+                            <div className="flex items-center justify-center gap-1">
+                              {/* Reply Button */}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  handleOpenReply(msg.phone_number)
+                                }
+                                className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                title="Reply via WhatsApp"
+                              >
+                                <Reply className="w-4 h-4" />
+                              </Button>
+
+                              {/* Extract Button */}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleExtract(msg)}
+                                className="h-8 w-8 p-0 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                                title="Extract Data"
+                              >
+                                <Sparkles className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))
