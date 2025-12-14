@@ -1,3 +1,4 @@
+import { getUserByPhone } from "@/api/auth";
 import {
   getFurnishedTypes,
   getPropertyTypes,
@@ -35,7 +36,14 @@ const Extraction = () => {
   const [currentMessage, setCurrentMessage] = useState<Message | null>(
     message || null
   );
-
+  // --- Fetch Existing User Logic ---
+  const { data: existingUser, isLoading: isUserLoading } = useQuery({
+    queryKey: ["check-user", currentMessage?.phone_number],
+    queryFn: () => getUserByPhone(currentMessage?.phone_number || ""),
+    enabled: !!currentMessage?.phone_number,
+    retry: false,
+    staleTime: 1000 * 60 * 5, // Cache result for 5 mins
+  });
   const handleNavigateMessage = (direction: "next" | "prev") => {
     if (!AllMessages || !currentMessage) return;
 
@@ -98,7 +106,7 @@ const Extraction = () => {
   // 1. Inventory Form Definition
   const inventoryForm = useForm<InventoryPayload>({
     defaultValues: {
-      source: "APP",
+      source: "WAP",
       type: "for_rent",
       privacy: "public",
       deal_deal_type: "Side-by-Side",
@@ -118,7 +126,7 @@ const Extraction = () => {
       bua: 0,
       additional_notes: "",
       inventory_options: {},
-      locations_text: {},
+      locations_text: [],
       duration_period: "0",
       duration_type: "MONTHLY",
       installment_period: "0",
@@ -134,20 +142,21 @@ const Extraction = () => {
   // 2. Request Form Definition
   const requestForm = useForm<RequestPayload>({
     defaultValues: {
-      source: "APP",
+      source: "WAP",
       type: "rent",
       privacy: "public",
       deal_type: "Side-by-Side",
-      urgent: true,
-      direct: true,
+      urgent: false,
+      direct: false,
+      active: false,
       whatsapp_msg: message?.content || "",
       property_type_ids: [],
       tag: 0,
       furnish_type: null,
       exact_location_ids: [],
       suggested_location_ids: [],
-      exact_locations_text: {},
-      suggested_locations_text: {},
+      exact_locations_text: [],
+      suggested_locations_text: [],
       egp_budget: "0",
       usd_budget: "0",
       no_bedroom: 0,
@@ -282,8 +291,6 @@ const Extraction = () => {
 
   const activeForm = formType === "inventory" ? inventoryForm : requestForm;
 
-  console.log(currentMessage);
-
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <div className="bg-white border-b px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-sm">
@@ -389,6 +396,8 @@ const Extraction = () => {
                   hasPrev={hasPrev}
                   currentIndex={currentIndex + 1}
                   total={totalMessages}
+                  existingUser={existingUser}
+                  isUserLoading={isUserLoading}
                 />
               </div>
             </Card>

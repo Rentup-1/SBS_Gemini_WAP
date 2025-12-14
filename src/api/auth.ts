@@ -28,3 +28,24 @@ export const getCurrentUser = async (): Promise<User> => {
   const response = await coreApi.get("/auth/me/");
   return response.data;
 };
+
+export const getUserByPhone = async (phone: string): Promise<User | null> => {
+  if (!phone) return null;
+
+  try {
+    const response = await coreApi.get<{ results: User[] }>("/users/", {
+      params: { search: phone },
+    });
+
+    const users = response.data.results;
+
+    if (Array.isArray(users) && users.length > 0) {
+      return users[0];
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error fetching user by phone:", error);
+    return null;
+  }
+};

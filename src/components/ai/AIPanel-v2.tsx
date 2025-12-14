@@ -1,14 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import type { FurnishedType, Message, PropertyType, Tag } from "@/types";
-import {
-  ArrowRightLeft
-} from "lucide-react";
+import type {
+  FurnishedType,
+  Message,
+  PropertyType,
+  Tag,
+  UserType,
+} from "@/types";
+import { ArrowRightLeft } from "lucide-react";
 import { useAIParser } from "./hooks/useAIParser";
 import { useLocationMatcher } from "./hooks/useLocationMatcher";
-import { AIDebugView } from "./ui/AIDebugView"; 
-import { AILocationManager } from "./ui/AILocationManager"; 
-import { AIMessageView } from "./ui/AIMessageView"; 
+import { AIDebugView } from "./ui/AIDebugView";
+import { AILocationManager } from "./ui/AILocationManager";
+import { AIMessageView } from "./ui/AIMessageView";
 import { AIPanelHeader } from "./ui/AIPanelHeader";
 
 interface AIPanelProps {
@@ -25,6 +29,8 @@ interface AIPanelProps {
   hasPrev: boolean;
   currentIndex: number;
   total: number;
+  existingUser?: UserType | null; // New
+  isUserLoading?: boolean;
 }
 
 const AIPanel = ({
@@ -35,6 +41,8 @@ const AIPanel = ({
   propertyTypes,
   furnishedTypes,
   tags,
+  existingUser, // Destructure new props
+  isUserLoading,
   ...navProps
 }: AIPanelProps) => {
   const aiLogic = useAIParser({
@@ -52,22 +60,15 @@ const AIPanel = ({
     aiResponse: aiLogic.aiResponse,
   });
 
-  // Combine results for display
-  const allMatches = [
-    ...(locLogic.results.fuzzyResults?.exact_matches || []).map((m) => ({
-      ...m,
-      type: "exact" as const,
-    })),
-    ...(locLogic.results.fuzzyResults?.suggested_matches || []).map((m) => ({
-      ...m,
-      type: "suggested" as const,
-    })),
-  ];
-
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <AIPanelHeader message={message} {...navProps} />
+      <AIPanelHeader
+        message={message}
+        {...navProps}
+        existingUser={existingUser}
+        isLoadingUser={isUserLoading}
+      />
 
       {/* Switcher & Message Input */}
       <Button
@@ -97,8 +98,6 @@ const AIPanel = ({
         isSearching={locLogic.isSearching}
         formType={formType}
       />
-
-      
 
       <div className="h-10"></div>
     </div>

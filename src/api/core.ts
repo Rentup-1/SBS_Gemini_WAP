@@ -1,16 +1,15 @@
-import { coreApi } from "./axios";
 import type {
-  Tag,
-  PropertyType,
-  FurnishedType,
-  Location,
-  FuzzyResponse,
   AIInventoryResponse,
   AIRequestResponse,
+  FurnishedType,
+  FuzzyResponse,
   InventoryPayload,
-  RequestPayload,
   LocationSearchResult,
+  PropertyType,
+  RequestPayload,
+  Tag,
 } from "@/types";
+import { coreApi } from "./axios";
 
 // Fetch all tags
 export const getTags = async (): Promise<Tag[]> => {

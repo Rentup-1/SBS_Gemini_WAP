@@ -1,3 +1,11 @@
+export interface UserType {
+  id: number;
+  name: string;
+  phone: string;
+  email?: string;
+  data_joined?: string;
+}
+
 // Message from WhatsApp API
 export interface Message {
   id: number;
@@ -249,7 +257,7 @@ export interface InventoryPayload {
   whatsapp_msg: string;
   additional_notes: string; // Description
   listing_code: string;
-  locations_text: Record<string, string>; // Empty object as per your JSON
+  locations_text: string[];
   inventory_options: Record<string, boolean>; // Empty object
 
   // Status flags
@@ -277,8 +285,8 @@ export interface RequestPayload {
   // Locations (Arrays)
   exact_location_ids: number[];
   suggested_location_ids: number[];
-  exact_locations_text: Record<string, string>;
-  suggested_locations_text: Record<string, string>;
+  exact_locations_text: string[];
+  suggested_locations_text: string[];
 
   // Specs
   bua: number;
