@@ -42,6 +42,8 @@ export const AIPanelHeader = ({
   existingUser,
   isLoadingUser,
 }: AIPanelHeaderProps) => {
+  console.log(message);
+
   // State for the reply message
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -54,6 +56,7 @@ export const AIPanelHeader = ({
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         phoneNumber={message.phone_number}
+        phone_number_type={message.type}
         defaultMessage={defaultTemplate}
       />
       {/*  Pagination */}

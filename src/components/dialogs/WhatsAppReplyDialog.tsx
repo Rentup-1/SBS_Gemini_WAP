@@ -20,6 +20,7 @@ interface WhatsAppReplyDialogProps {
   onOpenChange: (open: boolean) => void;
   phoneNumber: string | null;
   defaultMessage?: string;
+  phone_number_type?: string;
   onSuccess?: () => void;
 }
 
@@ -27,12 +28,12 @@ export const WhatsAppReplyDialog = ({
   open,
   onOpenChange,
   phoneNumber,
+  phone_number_type,
   defaultMessage = "",
   onSuccess,
 }: WhatsAppReplyDialogProps) => {
   const [replyText, setReplyText] = useState(defaultMessage);
 
-  // تحديث النص لما الـ Dialog يفتح أو الـ defaultMessage يتغير
   useEffect(() => {
     if (open) {
       setReplyText(defaultMessage);
@@ -46,7 +47,7 @@ export const WhatsAppReplyDialog = ({
       return sendWhatsAppReply({
         phone_number: phoneNumber,
         message: replyText,
-        phone_number_type: "request",
+        phone_number_type: phone_number_type,
       });
     },
     onSuccess: () => {
