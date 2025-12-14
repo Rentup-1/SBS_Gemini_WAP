@@ -1,18 +1,23 @@
+import { sendWhatsAppReply } from "@/api/messages";
+import { WhatsAppReplyDialog } from "@/components/dialogs/WhatsAppReplyDialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
+import type { Message, UserType } from "@/types";
+import { useMutation } from "@tanstack/react-query";
 import {
-  User,
-  Phone,
-  Globe,
-  MessageCircle,
-  TagIcon,
   ChevronLeft,
   ChevronRight,
+  Globe,
   Loader2,
+  MessageCircle,
+  Phone,
+  TagIcon,
+  User,
   UserCheck,
   UserPlus,
 } from "lucide-react";
-import type { Message, UserType } from "@/types";
-import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 
 interface AIPanelHeaderProps {
   message: Message;
@@ -37,8 +42,20 @@ export const AIPanelHeader = ({
   existingUser,
   isLoadingUser,
 }: AIPanelHeaderProps) => {
+  // State for the reply message
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Default message template (Optional)
+  const defaultTemplate = `Welcome to SBS Brokerz! \nSince you are a new user, please complete your registration here: \nhttps://sbs-brokerz.com/register?phone=${message.phone_number}`;
   return (
     <div className="bg-slate-50 border rounded-lg p-4 space-y-3">
+      {/* 1. The Reusable Dialog Component */}
+      <WhatsAppReplyDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        phoneNumber={message.phone_number}
+        defaultMessage={defaultTemplate}
+      />
       {/*  Pagination */}
       <div className="flex items-center justify-between border-b pb-3 mb-2 border-slate-200">
         <div className=" flex items-center gap-2">
@@ -73,17 +90,16 @@ export const AIPanelHeader = ({
           ) : existingUser ? (
             <Badge className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200 gap-1.5 px-3 py-1">
               <UserCheck className="w-4 h-4" />
-              <span>
-                Existing: {existingUser.name || "Unknown Name"}
-              </span>
+              <span>Existing: {existingUser.name || "Unknown Name"}</span>
             </Badge>
           ) : (
             <Badge
               variant="secondary"
-              className="bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-200 gap-1.5 px-3 py-1"
+              className="bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-200 gap-1.5 px-3 py-1 cursor-pointer"
+              onClick={() => setIsDialogOpen(true)}
             >
               <UserPlus className="w-4 h-4" />
-              <span>New User</span>
+              <span>New User (Click to Reply)</span>
             </Badge>
           )}
         </div>
@@ -118,6 +134,14 @@ export const AIPanelHeader = ({
           value={message.type}
           valueClass="text-blue-700 capitalize"
         />
+        {existingUser && (
+          <InfoItem
+            icon={UserCheck}
+            label="System User ID"
+            value={`#${existingUser.id}`}
+            valueClass="text-green-700 font-bold"
+          />
+        )}
       </div>
     </div>
   );

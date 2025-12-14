@@ -1,3 +1,4 @@
+// get list of users
 export interface UserType {
   id: number;
   name: string;
@@ -5,7 +6,12 @@ export interface UserType {
   email?: string;
   data_joined?: string;
 }
-
+// Message to WhatsApp API
+export interface ReplyPayload {
+  phone_number: string;
+  message: string;
+  phone_number_type: string; // "request" or others
+}
 // Message from WhatsApp API
 export interface Message {
   id: number;
