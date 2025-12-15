@@ -249,7 +249,7 @@ export interface InventoryPayload {
   egp_price: string; // API expects string
   usd_price: string; // API expects string
   transaction_type: string; // DAILY, MONTHLY, CASH, INSTALLMENT
-  deal_deal_type: string; // Side-by-Side, Direct
+  deal_type: string; // Side-by-Side, Direct
 
   // Duration & Installment
   duration_period: string;

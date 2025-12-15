@@ -379,7 +379,7 @@ const InventoryForm = ({
           <div className="space-y-1.5">
             <Label>Deal Type</Label>
             <Controller
-              name="deal_deal_type"
+              name="deal_type"
               control={control}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>

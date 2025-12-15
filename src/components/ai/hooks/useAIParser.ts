@@ -110,9 +110,6 @@ export const useAIParser = ({
 
     // 7. Deal Type & Meta
     if (data.deal_deal_type) {
-      if (formType === "request") {
-        form.setValue("deal_deal_type", data.deal_deal_type);
-      }
       form.setValue("deal_type", data.deal_deal_type);
     }
     if (data.listing_code) form.setValue("listing_code", data.listing_code);

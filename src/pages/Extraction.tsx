@@ -109,7 +109,7 @@ const Extraction = () => {
       source: "WAP",
       type: "for_rent",
       privacy: "public",
-      deal_deal_type: "Side-by-Side",
+      deal_type: "Side-by-Side",
       urgent: false,
       direct: false,
       active: false,

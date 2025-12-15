@@ -52,7 +52,7 @@ const Login = () => {
       const err = error as AxiosError<{ detail: string }>;
       toast({
         title: "Login Failed",
-        description: error.response?.data?.detail || "Invalid credentials",
+        description: err.response?.data?.detail || "Invalid credentials",
         variant: "destructive",
       });
     } finally {
@@ -93,7 +93,7 @@ const Login = () => {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
                   className="flex-1 bg-background border-input"
-                  maxLength={10}
+                  maxLength={11}
                 />
               </div>
               <p className="text-xs text-muted-foreground">
