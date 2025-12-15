@@ -293,7 +293,7 @@ const RequestForm = ({
                   <SelectContent>
                     <SelectItem value="MONTHLY">Months</SelectItem>
                     <SelectItem value="DAILY">Days</SelectItem>
-                    <SelectItem value="YEARS">Years</SelectItem>
+                    <SelectItem value="YEARLY">Years</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -509,10 +509,6 @@ const RequestForm = ({
                 </div>
               ))}
             </div>
-            {/* <p className="text-[10px] text-muted-foreground">
-              * These options are extracted for reference but are not currently
-              sent to the database.
-            </p> */}
           </div>
         </div>
       )}

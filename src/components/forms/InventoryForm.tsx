@@ -232,7 +232,7 @@ const InventoryForm = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="MONTHLY">Months</SelectItem>
-                    <SelectItem value="YEARS">Years</SelectItem>
+                    <SelectItem value="YEARLY">Years</SelectItem>
                     <SelectItem value="DAILY">Days</SelectItem>
                   </SelectContent>
                 </Select>

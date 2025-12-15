@@ -96,12 +96,12 @@ export const useAIParser = ({
     if (data.duration_period)
       form.setValue("duration_period", String(data.duration_period));
     if (data.duration_type) {
-      const lowerType = data.duration_type.toLowerCase();
-      if (lowerType.includes("yearly") || lowerType.includes("year")) {
-        form.setValue("duration_type", "YEARS");
-      } else {
-        form.setValue("duration_type", data.duration_type.toUpperCase());
-      }
+      // const lowerType = data.duration_type.toLowerCase();
+      // if (lowerType.includes("years") || lowerType.includes("year")) {
+      //   form.setValue("duration_type", "YEARLY");
+      // } else {
+      form.setValue("duration_type", data.duration_type.toUpperCase());
+      // }
     }
     if (data.installment_period)
       form.setValue("installment_period", String(data.installment_period));
