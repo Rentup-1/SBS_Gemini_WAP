@@ -17,7 +17,7 @@ import type { InventoryPayload, Message, RequestPayload } from "@/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { ArrowLeft, Loader2, LogOut, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -113,7 +113,7 @@ const Extraction = () => {
       urgent: false,
       direct: false,
       active: false,
-      whatsapp_msg: message?.content || "",
+      whatsapp_msg: currentMessage?.content || "",
       property_type: null,
       tag: null,
       furnish_type: null,
@@ -149,7 +149,7 @@ const Extraction = () => {
       urgent: false,
       direct: false,
       active: false,
-      whatsapp_msg: message?.content || "",
+      whatsapp_msg: currentMessage?.content || "",
       property_type_ids: [],
       tag: 0,
       furnish_type: null,
@@ -171,6 +171,79 @@ const Extraction = () => {
       duration_end_date: new Date().toISOString().split("T")[0],
     },
   });
+
+  // Reset forms when currentMessage changes
+  useEffect(() => {
+    if (!currentMessage) return;
+
+    const today = new Date().toISOString().split("T")[0];
+
+    // Reset inventory form with new message data
+    inventoryForm.reset({
+      source: "wap",
+      type: "for_rent",
+      privacy: "public",
+      deal_type: "Side-by-Side",
+      urgent: false,
+      direct: false,
+      active: false,
+      whatsapp_msg: currentMessage.content || "",
+      property_type: null,
+      tag: null,
+      furnish_type: null,
+      location: null,
+      egp_price: "0",
+      usd_price: "0",
+      no_bedroom: 0,
+      no_bathroom: 0,
+      no_master_room: 0,
+      bua: 0,
+      additional_notes: "",
+      inventory_options: {},
+      locations_text: [],
+      duration_period: "0",
+      duration_type: "monthly",
+      installment_period: "0",
+      installment_type: "monthly",
+      listing_code: "0",
+      transaction_type: "monthly",
+      duration_start_date: today,
+      duration_end_date: today,
+      fuzzy_status: "DONE",
+    });
+
+    // Reset request form with new message data
+    requestForm.reset({
+      source: "wap",
+      type: "rent",
+      privacy: "public",
+      deal_type: "Side-by-Side",
+      urgent: false,
+      direct: false,
+      active: false,
+      whatsapp_msg: currentMessage.content || "",
+      property_type_ids: [],
+      tag: 0,
+      furnish_type: null,
+      exact_location_ids: [],
+      suggested_location_ids: [],
+      exact_locations_text: [],
+      suggested_locations_text: [],
+      egp_budget: "0",
+      usd_budget: "0",
+      no_bedroom: 0,
+      no_bathroom: 0,
+      no_master_room: 0,
+      bua: 0,
+      transaction_type: "monthly",
+      duration_type: "monthly",
+      installment_period: "0",
+      installment_type: "monthly",
+      duration_start_date: today,
+      duration_end_date: today,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentMessage?.id]);
 
   const inventoryMutation = useMutation({
     mutationFn: (data: InventoryPayload) => saveInventory(data),
