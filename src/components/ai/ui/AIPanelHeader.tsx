@@ -42,7 +42,6 @@ export const AIPanelHeader = ({
   existingUser,
   isLoadingUser,
 }: AIPanelHeaderProps) => {
-
   // State for the reply message
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 

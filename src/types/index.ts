@@ -22,10 +22,9 @@ export interface Message {
   source?: string;
   listing_status: string;
   timestamp?: string;
-  // sent_at?: string | null;
-  // created_at?: string;
-  // media_urls?: string[];
   media_type?: string;
+  image?: string | null;
+  video?: string | null;
 }
 
 // Tags for categorization

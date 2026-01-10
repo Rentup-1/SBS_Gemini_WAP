@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import type { PropertyType, Tag, FurnishedType, Message } from "@/types";
 import { LocationSearch } from "../common/LocationSearch";
+import { MediaPreview } from "../common/MediaPreview";
 import { Separator } from "@radix-ui/react-separator";
 
 interface RequestFormProps {
@@ -602,6 +603,13 @@ const RequestForm = ({
           </div>
         </div>
       </div>
+
+      {/* 5. Media Attachment Preview */}
+      <MediaPreview
+        imageUrl={message.image}
+        videoUrl={message.video}
+        mediaType={message.media_type}
+      />
     </div>
   );
 };

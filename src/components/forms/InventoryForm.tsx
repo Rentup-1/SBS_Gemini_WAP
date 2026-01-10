@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import type { PropertyType, Tag, FurnishedType, Message } from "@/types";
 import { LocationSearch } from "../common/LocationSearch";
+import { MediaPreview } from "../common/MediaPreview";
 
 interface InventoryFormProps {
   propertyTypes: PropertyType[];
@@ -460,6 +461,13 @@ const InventoryForm = ({
           </div>
         </div>
       </div>
+
+      {/* 6. Media Attachment Preview */}
+      <MediaPreview
+        imageUrl={message.image}
+        videoUrl={message.video}
+        mediaType={message.media_type}
+      />
     </div>
   );
 };
