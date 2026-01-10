@@ -256,11 +256,11 @@ const RequestForm = ({
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="MONTHLY">Monthly</SelectItem>
-                    <SelectItem value="DAILY">Daily</SelectItem>
-                    <SelectItem value="YEARLY">Yearly</SelectItem>
-                    <SelectItem value="CASH">Cash</SelectItem>
-                    <SelectItem value="INSTALLMENT">Installment</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                    <SelectItem value="cash">Cash</SelectItem>
+                    <SelectItem value="installment">Installment</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -292,9 +292,9 @@ const RequestForm = ({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="MONTHLY">Months</SelectItem>
-                    <SelectItem value="DAILY">Days</SelectItem>
-                    <SelectItem value="YEARLY">Years</SelectItem>
+                    <SelectItem value="monthly">Months</SelectItem>
+                    <SelectItem value="daily">Days</SelectItem>
+                    <SelectItem value="yearly">Years</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -334,9 +334,9 @@ const RequestForm = ({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="MONTHLY">Months</SelectItem>
-                    <SelectItem value="YEARLY">Years</SelectItem>
-                    <SelectItem value="DAILY">Days</SelectItem>
+                    <SelectItem value="monthly">Months</SelectItem>
+                    <SelectItem value="yearly">Years</SelectItem>
+                    <SelectItem value="quarterly">Quarters</SelectItem>
                   </SelectContent>
                 </Select>
               )}

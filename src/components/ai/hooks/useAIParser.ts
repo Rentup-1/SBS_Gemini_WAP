@@ -92,7 +92,7 @@ export const useAIParser = ({
 
     // 6. Transaction & Duration
     if (data.transaction_type)
-      form.setValue("transaction_type", data.transaction_type.toUpperCase());
+      form.setValue("transaction_type", data.transaction_type.toLowerCase());
     if (data.duration_period)
       form.setValue("duration_period", String(data.duration_period));
     if (data.duration_type) {
@@ -100,13 +100,13 @@ export const useAIParser = ({
       // if (lowerType.includes("years") || lowerType.includes("year")) {
       //   form.setValue("duration_type", "YEARLY");
       // } else {
-      form.setValue("duration_type", data.duration_type.toUpperCase());
+      form.setValue("duration_type", data.duration_type.toLowerCase());
       // }
     }
     if (data.installment_period)
       form.setValue("installment_period", String(data.installment_period));
     if (data.installment_type)
-      form.setValue("installment_type", data.installment_type.toUpperCase());
+      form.setValue("installment_type", data.installment_type.toLowerCase());
 
     // 7. Deal Type & Meta
     if (data.deal_deal_type) {

@@ -30,7 +30,7 @@ const InventoryForm = ({
   const { register, control, watch, setValue } = useFormContext();
   const locationName = watch("location_name");
   // const locationName = watch("locations_text_display"); // Temporary field for display
-  const inventoryOptions = watch("inventory_options") || {};  
+  const inventoryOptions = watch("inventory_options") || {};
   const optionsKeys = Object.keys(inventoryOptions);
 
   return (
@@ -199,11 +199,11 @@ const InventoryForm = ({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="MONTHLY">Monthly</SelectItem>
-                    <SelectItem value="DAILY">Daily</SelectItem>
-                    <SelectItem value="CASH">Cash</SelectItem>
-                    <SelectItem value="YEARLY">Yearly</SelectItem>
-                    <SelectItem value="INSTALLMENT">Installment</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="cash">Cash</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                    <SelectItem value="installment">Installment</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -232,9 +232,9 @@ const InventoryForm = ({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="MONTHLY">Months</SelectItem>
-                    <SelectItem value="YEARLY">Years</SelectItem>
-                    <SelectItem value="DAILY">Days</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -276,9 +276,9 @@ const InventoryForm = ({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="MONTHLY">Monthly</SelectItem>
-                    <SelectItem value="QUARTERLY">Quarterly</SelectItem>
-                    <SelectItem value="YEARLY">Yearly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="quarterly">Quarterly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
                   </SelectContent>
                 </Select>
               )}

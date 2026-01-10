@@ -106,7 +106,7 @@ const Extraction = () => {
   // 1. Inventory Form Definition
   const inventoryForm = useForm<InventoryPayload>({
     defaultValues: {
-      source: "WAP",
+      source: "wap",
       type: "for_rent",
       privacy: "public",
       deal_type: "Side-by-Side",
@@ -128,11 +128,11 @@ const Extraction = () => {
       inventory_options: {},
       locations_text: [],
       duration_period: "0",
-      duration_type: "MONTHLY",
+      duration_type: "monthly",
       installment_period: "0",
-      installment_type: "MONTHLY",
+      installment_type: "monthly",
       listing_code: "0",
-      transaction_type: "MONTHLY",
+      transaction_type: "monthly",
       duration_start_date: new Date().toISOString().split("T")[0],
       duration_end_date: new Date().toISOString().split("T")[0],
       fuzzy_status: "DONE",
@@ -142,7 +142,7 @@ const Extraction = () => {
   // 2. Request Form Definition
   const requestForm = useForm<RequestPayload>({
     defaultValues: {
-      source: "WAP",
+      source: "wap",
       type: "rent",
       privacy: "public",
       deal_type: "Side-by-Side",
@@ -163,10 +163,10 @@ const Extraction = () => {
       no_bathroom: 0,
       no_master_room: 0,
       bua: 0,
-      transaction_type: "MONTHLY",
-      duration_type: "MONTHLY",
+      transaction_type: "monthly",
+      duration_type: "monthly",
       installment_period: "0",
-      installment_type: "MONTHLY",
+      installment_type: "monthly",
       duration_start_date: new Date().toISOString().split("T")[0],
       duration_end_date: new Date().toISOString().split("T")[0],
     },
