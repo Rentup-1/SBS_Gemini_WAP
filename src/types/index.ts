@@ -123,10 +123,18 @@ export interface AIProcessResponse {
   direct?: boolean;
   source?: string;
   listing_code?: string;
-  duration_period?: string;
-  duration_type?: string;
-  installment_period?: string;
-  installment_type?: string;
+
+  // Duration fields (new naming from AI)
+  rent_duration_period?: string;
+  rent_duration_type?: string;
+  rent_duration_start_date?: string;
+  rent_duration_end_date?: string;
+
+  // Installment fields
+  installment_period_type?: string;
+  installment_amount?: string;
+  total_installment_period?: string;
+  installment_payment_plan?: string;
 
   inventory_options?: string;
   request_options?: string;
@@ -156,10 +164,19 @@ export interface AIInventoryResponse {
   privacy?: string;
   direct?: boolean;
   source?: string;
-  duration_period?: string;
-  duration_type?: string;
-  installment_period?: string;
-  installment_type?: string;
+
+  // Duration fields (new naming from AI)
+  rent_duration_period?: string;
+  rent_duration_type?: string;
+  rent_duration_start_date?: string;
+  rent_duration_end_date?: string;
+
+  // Installment fields
+  installment_period_type?: string;
+  installment_amount?: string;
+  total_installment_period?: string;
+  installment_payment_plan?: string;
+
   listing_code?: string;
   agent_assigned?: number;
 }
@@ -194,10 +211,19 @@ export interface AIRequestResponse {
   privacy?: string;
   direct?: boolean;
   source?: string;
-  duration_period?: string;
-  duration_type?: string;
-  installment_period?: string;
-  installment_type?: string;
+
+  // Duration fields (new naming from AI)
+  rent_duration_period?: string;
+  rent_duration_type?: string;
+  rent_duration_start_date?: string;
+  rent_duration_end_date?: string;
+
+  // Installment fields
+  installment_period_type?: string;
+  installment_amount?: string;
+  total_installment_period?: string;
+  installment_payment_plan?: string;
+
   listing_code?: string;
   agent_assigned?: number;
 }
@@ -236,8 +262,6 @@ export interface InventoryPayload {
   tag: number;
   furnish_type: number;
   location: number | null;
-  // agent_assigned: number;
-
   // Specs
   bua: number;
   no_bedroom: number;
@@ -245,25 +269,29 @@ export interface InventoryPayload {
   no_master_room: number;
 
   // Budget & Deal
-  egp_price: string; // API expects string
-  usd_price: string; // API expects string
-  transaction_type: string; // DAILY, MONTHLY, CASH, INSTALLMENT
+  egp_price: string;
+  usd_price: string;
+  transaction_type: string; // daily, monthly, cash, installment
   deal_type: string; // Side-by-Side, Direct
 
-  // Duration & Installment
-  duration_period: string;
-  duration_type: string;
-  duration_start_date: string; // YYYY-MM-DD
-  duration_end_date: string; // YYYY-MM-DD
-  installment_period: string;
-  installment_type: string;
+  // Duration (rent_duration_* naming)
+  rent_duration_period: string;
+  rent_duration_type: string;
+  rent_duration_start_date: string; // YYYY-MM-DD
+  rent_duration_end_date: string; // YYYY-MM-DD
+
+  // Installment (new field names)
+  installment_period_type: string;
+  installment_amount: string;
+  total_installment_period: string;
+  installment_payment_plan: string;
 
   // Meta
   whatsapp_msg: string;
-  additional_notes: string; // Description
+  additional_notes: string;
   listing_code: string;
   locations_text: string[];
-  inventory_options: Record<string, boolean>; // Empty object
+  inventory_options: Record<string, boolean>;
 
   // Status flags
   active: boolean;
@@ -277,13 +305,11 @@ export interface RequestPayload {
   phone?: string;
   message_id?: number;
 
-  duration_period?: string;
-
   source: string;
-  type: string; // "rent" | "buy" (Note: your JSON showed "rent" not "for_rent" here, but usually consistent)
+  type: string; // "rent" | "buy"
 
   // IDs
-  property_type_ids: number[]; // Array
+  property_type_ids: number[];
   tag: number;
   furnish_type: number;
 
@@ -303,17 +329,23 @@ export interface RequestPayload {
   egp_budget: string;
   usd_budget: string;
   transaction_type: string;
-  deal_type: string; // Note: Payload says "deal_type", Inventory says "deal_deal_type"
+  deal_type: string;
 
-  // Duration & Installment
-  duration_type: string;
-  duration_start_date: string;
-  duration_end_date: string;
-  installment_period: string;
-  installment_type: string;
+  // Duration (rent_duration_* naming)
+  rent_duration_period?: string;
+  rent_duration_type: string;
+  rent_duration_start_date: string;
+  rent_duration_end_date: string;
+
+  // Installment (new field names)
+  installment_period_type: string;
+  installment_amount: string;
+  total_installment_period: string;
+  installment_payment_plan: string;
 
   // Meta
   whatsapp_msg: string;
+  listing_code?: string;
 
   // Status
   urgent: boolean;

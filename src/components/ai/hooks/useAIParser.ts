@@ -93,20 +93,39 @@ export const useAIParser = ({
     // 6. Transaction & Duration
     if (data.transaction_type)
       form.setValue("transaction_type", data.transaction_type.toLowerCase());
-    if (data.duration_period)
-      form.setValue("duration_period", String(data.duration_period));
-    if (data.duration_type) {
-      // const lowerType = data.duration_type.toLowerCase();
-      // if (lowerType.includes("years") || lowerType.includes("year")) {
-      //   form.setValue("duration_type", "YEARLY");
-      // } else {
-      form.setValue("duration_type", data.duration_type.toLowerCase());
-      // }
+
+    // Both Inventory and Request now use rent_duration_* field names
+    if (data.rent_duration_period) {
+      form.setValue("rent_duration_period", String(data.rent_duration_period));
     }
-    if (data.installment_period)
-      form.setValue("installment_period", String(data.installment_period));
-    if (data.installment_type)
-      form.setValue("installment_type", data.installment_type.toLowerCase());
+    if (data.rent_duration_type) {
+      form.setValue(
+        "rent_duration_type",
+        data.rent_duration_type.toLowerCase()
+      );
+    }
+    if (data.rent_duration_start_date) {
+      form.setValue("rent_duration_start_date", data.rent_duration_start_date);
+    }
+    if (data.rent_duration_end_date) {
+      form.setValue("rent_duration_end_date", data.rent_duration_end_date);
+    }
+
+    // Installment fields (new naming)
+    if (data.installment_period_type)
+      form.setValue(
+        "installment_period_type",
+        data.installment_period_type.toLowerCase()
+      );
+    if (data.installment_amount)
+      form.setValue("installment_amount", String(data.installment_amount));
+    if (data.total_installment_period)
+      form.setValue(
+        "total_installment_period",
+        String(data.total_installment_period)
+      );
+    if (data.installment_payment_plan)
+      form.setValue("installment_payment_plan", data.installment_payment_plan);
 
     // 7. Deal Type & Meta
     if (data.deal_deal_type) {

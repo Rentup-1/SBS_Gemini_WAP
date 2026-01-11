@@ -273,7 +273,7 @@ const RequestForm = ({
           <div className="space-y-1.5">
             <Label className="text-xs">Duration Period</Label>
             <Input
-              {...register("duration_period")}
+              {...register("rent_duration_period")}
               placeholder="e.g. 12"
               className="h-8"
             />
@@ -281,7 +281,7 @@ const RequestForm = ({
           <div className="space-y-1.5">
             <Label className="text-xs">Duration Type</Label>
             <Controller
-              name="duration_type"
+              name="rent_duration_type"
               control={control}
               render={({ field }) => (
                 <Select
@@ -304,7 +304,7 @@ const RequestForm = ({
             <Label className="text-xs">Start Date</Label>
             <Input
               type="date"
-              {...register("duration_start_date")}
+              {...register("rent_duration_start_date")}
               className="h-8"
             />
           </div>
@@ -312,18 +312,14 @@ const RequestForm = ({
             <Label className="text-xs">End Date</Label>
             <Input
               type="date"
-              {...register("duration_end_date")}
+              {...register("rent_duration_end_date")}
               className="h-8"
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs">Inst. Period</Label>
-            <Input {...register("installment_period")} className="h-8" />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Inst. Type</Label>
+            <Label className="text-xs">Inst. Period Type</Label>
             <Controller
-              name="installment_type"
+              name="installment_period_type"
               control={control}
               render={({ field }) => (
                 <Select
@@ -334,12 +330,37 @@ const RequestForm = ({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="monthly">Months</SelectItem>
-                    <SelectItem value="yearly">Years</SelectItem>
-                    <SelectItem value="quarterly">Quarters</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                    <SelectItem value="quarterly">Quarterly</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
                   </SelectContent>
                 </Select>
               )}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Total Inst. Period</Label>
+            <Input
+              {...register("total_installment_period")}
+              className="h-8"
+              placeholder="e.g. 5"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Inst. Amount</Label>
+            <Input
+              {...register("installment_amount")}
+              className="h-8"
+              placeholder="Amount"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Payment Plan</Label>
+            <Input
+              {...register("installment_payment_plan")}
+              className="h-8"
+              placeholder="Plan"
             />
           </div>
         </div>
