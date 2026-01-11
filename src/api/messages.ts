@@ -1,4 +1,4 @@
-import { coreApi, messagesApi } from "./axios";
+import { coreApi, } from "./axios";
 import type { Message, ReplyPayload } from "@/types";
 
 export const getMessages = async (): Promise<Message[]> => {

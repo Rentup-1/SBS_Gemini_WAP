@@ -14,15 +14,6 @@ export const clearTokens = () => {
   localStorage.removeItem("refreshToken");
 };
 
-// Messages API instance (sbsapi.rentup.com.eg)
-export const messagesApi = axios.create({
-  baseURL: "https://sbsapi.rentup.com.eg/api",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: "Bearer 4e14bf9daafbe8d1fba7bf82f173b873",
-  },
-});
-
 // Core API instance (api.sbs-brokerz.com)
 export const coreApi = axios.create({
   baseURL: "https://api.sbs-brokerz.com/api/v1",
