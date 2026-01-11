@@ -11,9 +11,13 @@ import type {
 } from "@/types";
 import { coreApi } from "./axios";
 
-// Fetch all tags
-export const getTags = async (): Promise<Tag[]> => {
-  const response = await coreApi.get("/tags/");
+// Fetch tags with optional filter
+export const getTags = async (
+  appliesTo?: "inventory" | "request"
+): Promise<Tag[]> => {
+  const response = await coreApi.get("/tags/", {
+    params: appliesTo ? { applies_to: appliesTo } : undefined,
+  });
   return response.data;
 };
 

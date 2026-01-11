@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import type { InventoryPayload, Message, RequestPayload } from "@/types";
+import type { InventoryPayload, Message, RequestPayload, Tag } from "@/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { ArrowLeft, Loader2, LogOut, Sparkles } from "lucide-react";
@@ -90,9 +90,9 @@ const Extraction = () => {
     message?.type?.toLowerCase() === "request" ? "request" : "inventory"
   );
 
-  const { data: tags = [] } = useQuery({
-    queryKey: ["tags"],
-    queryFn: getTags,
+  const { data: tags = [] } = useQuery<Tag[]>({
+    queryKey: ["tags", formType],
+    queryFn: () => getTags(formType),
   });
   const { data: propertyTypes = [] } = useQuery({
     queryKey: ["propertyTypes"],
@@ -292,20 +292,68 @@ const Extraction = () => {
 
   const handleSaveInventory = (data: InventoryPayload) => {
     if (!currentMessage) return;
-    inventoryMutation.mutate({
+
+    // Determine which fields to null out based on type and transaction_type
+    const isRent = data.type === "for_rent";
+    const isSale = data.type === "for_sale";
+    const isInstallment = data.transaction_type === "installment";
+
+    // Build payload with nulled fields based on business logic
+    const payload: InventoryPayload = {
       ...data,
       phone: message.phone_number,
       message_id: message.id,
-    });
+      // for_rent: keep rent_duration, null installment
+      // for_sale + cash: null both
+      // for_sale + installment: null rent_duration, keep installment
+      rent_duration_period: isRent ? data.rent_duration_period : null,
+      rent_duration_type: isRent ? data.rent_duration_type : null,
+      rent_duration_start_date: isRent ? data.rent_duration_start_date : null,
+      rent_duration_end_date: isRent ? data.rent_duration_end_date : null,
+      installment_period_type:
+        isSale && isInstallment ? data.installment_period_type : null,
+      installment_amount:
+        isSale && isInstallment ? data.installment_amount : null,
+      total_installment_period:
+        isSale && isInstallment ? data.total_installment_period : null,
+      installment_payment_plan:
+        isSale && isInstallment ? data.installment_payment_plan : null,
+    };
+
+    inventoryMutation.mutate(payload);
   };
 
   const handleSaveRequest = (data: RequestPayload) => {
     if (!currentMessage) return;
-    requestMutation.mutate({
+
+    // Determine which fields to null out based on type and transaction_type
+    const isRent = data.type === "rent";
+    const isBuy = data.type === "buy";
+    const isInstallment = data.transaction_type === "installment";
+
+    // Build payload with nulled fields based on business logic
+    const payload: RequestPayload = {
       ...data,
       phone: message.phone_number,
       message_id: message.id,
-    });
+      // rent: keep rent_duration, null installment
+      // buy + cash: null both
+      // buy + installment: null rent_duration, keep installment
+      rent_duration_period: isRent ? data.rent_duration_period : null,
+      rent_duration_type: isRent ? data.rent_duration_type : null,
+      rent_duration_start_date: isRent ? data.rent_duration_start_date : null,
+      rent_duration_end_date: isRent ? data.rent_duration_end_date : null,
+      installment_period_type:
+        isBuy && isInstallment ? data.installment_period_type : null,
+      installment_amount:
+        isBuy && isInstallment ? data.installment_amount : null,
+      total_installment_period:
+        isBuy && isInstallment ? data.total_installment_period : null,
+      installment_payment_plan:
+        isBuy && isInstallment ? data.installment_payment_plan : null,
+    };
+
+    requestMutation.mutate(payload);
   };
 
   if (!currentMessage) {

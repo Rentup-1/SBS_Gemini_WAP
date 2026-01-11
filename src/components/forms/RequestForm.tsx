@@ -32,6 +32,21 @@ const RequestForm = ({
 }: RequestFormProps) => {
   const { register, control, watch, setValue } = useFormContext();
 
+  // Watch type and transaction_type for conditional field visibility
+  const type = watch("type");
+  const transactionType = watch("transaction_type");
+
+  // Determine which sections to show
+  const isRent = type === "rent";
+  const isBuy = type === "buy";
+  const isInstallment = transactionType === "installment";
+
+  // rent: show rent_duration, hide installment
+  // buy + cash: hide both
+  // buy + installment: hide rent_duration, show installment
+  const showRentDuration = isRent;
+  const showInstallment = isBuy && isInstallment;
+
   // Custom Logic for Multi-select Property Types
   const selectedPropTypes = watch("property_type_ids") || [];
 
@@ -268,102 +283,119 @@ const RequestForm = ({
           </div>
         </div>
 
-        {/* Duration Details */}
-        <div className="grid grid-cols-4 gap-4 bg-slate-50 p-3 rounded-md border">
-          <div className="space-y-1.5">
-            <Label className="text-xs">Duration Period</Label>
-            <Input
-              {...register("rent_duration_period")}
-              placeholder="e.g. 12"
-              className="h-8"
-            />
+        {/* Rent Duration Section - Only for rent */}
+        {showRentDuration && (
+          <div className="space-y-2">
+            <h5 className="text-xs font-medium text-slate-600">
+              Rent Duration
+            </h5>
+            <div className="grid grid-cols-4 gap-4 bg-blue-50 p-3 rounded-md border border-blue-200">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Duration Period</Label>
+                <Input
+                  {...register("rent_duration_period")}
+                  placeholder="e.g. 12"
+                  className="h-8"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Duration Type</Label>
+                <Controller
+                  name="rent_duration_type"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="yearly">Yearly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Start Date</Label>
+                <Input
+                  type="date"
+                  {...register("rent_duration_start_date")}
+                  className="h-8"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">End Date</Label>
+                <Input
+                  type="date"
+                  {...register("rent_duration_end_date")}
+                  className="h-8"
+                />
+              </div>
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Duration Type</Label>
-            <Controller
-              name="rent_duration_type"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value || ""}
-                >
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="monthly">Months</SelectItem>
-                    <SelectItem value="daily">Days</SelectItem>
-                    <SelectItem value="yearly">Years</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
+        )}
+
+        {/* Installment Section - Only for buy + installment */}
+        {showInstallment && (
+          <div className="space-y-2">
+            <h5 className="text-xs font-medium text-slate-600">
+              Installment Details
+            </h5>
+            <div className="grid grid-cols-4 gap-4 bg-amber-50 p-3 rounded-md border border-amber-200">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Period Type</Label>
+                <Controller
+                  name="installment_period_type"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="quarterly">Quarterly</SelectItem>
+                        <SelectItem value="yearly">Yearly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Total Periods</Label>
+                <Input
+                  {...register("total_installment_period")}
+                  className="h-8"
+                  placeholder="e.g. 5"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Amount</Label>
+                <Input
+                  {...register("installment_amount")}
+                  className="h-8"
+                  placeholder="Amount"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Payment Plan</Label>
+                <Input
+                  {...register("installment_payment_plan")}
+                  className="h-8"
+                  placeholder="Plan"
+                />
+              </div>
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Start Date</Label>
-            <Input
-              type="date"
-              {...register("rent_duration_start_date")}
-              className="h-8"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">End Date</Label>
-            <Input
-              type="date"
-              {...register("rent_duration_end_date")}
-              className="h-8"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Inst. Period Type</Label>
-            <Controller
-              name="installment_period_type"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value || ""}
-                >
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                    <SelectItem value="yearly">Yearly</SelectItem>
-                    <SelectItem value="quarterly">Quarterly</SelectItem>
-                    <SelectItem value="daily">Daily</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Total Inst. Period</Label>
-            <Input
-              {...register("total_installment_period")}
-              className="h-8"
-              placeholder="e.g. 5"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Inst. Amount</Label>
-            <Input
-              {...register("installment_amount")}
-              className="h-8"
-              placeholder="Amount"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Payment Plan</Label>
-            <Input
-              {...register("installment_payment_plan")}
-              className="h-8"
-              placeholder="Plan"
-            />
-          </div>
-        </div>
+        )}
       </div>
 
       {/* 3. Specs & Location */}
