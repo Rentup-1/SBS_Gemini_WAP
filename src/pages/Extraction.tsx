@@ -336,6 +336,10 @@ const Extraction = () => {
       ...data,
       phone: message.phone_number,
       message_id: message.id,
+      // Convert null/undefined to 0 for room fields (backend rejects null)
+      no_bedroom: data.no_bedroom ?? 0,
+      no_bathroom: data.no_bathroom ?? 0,
+      no_master_room: data.no_master_room ?? 0,
       // rent: keep rent_duration, null installment
       // buy + cash: null both
       // buy + installment: null rent_duration, keep installment
