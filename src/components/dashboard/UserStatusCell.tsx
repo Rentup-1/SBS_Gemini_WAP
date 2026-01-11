@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, UserCheck, UserPlus } from "lucide-react";
+import { UserCheck, UserPlus } from "lucide-react";
 import { getUserByPhone } from "@/api/auth";
+import { InlineLoader } from "@/components/common/LoadingSpinner";
 
 interface UserStatusCellProps {
   phone: string;
-  onNewUserClick?: () => void; 
+  onNewUserClick?: () => void;
 }
 
 export const UserStatusCell = ({
@@ -21,7 +22,7 @@ export const UserStatusCell = ({
   });
 
   if (isLoading) {
-    return <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />;
+    return <InlineLoader />;
   }
 
   if (user) {

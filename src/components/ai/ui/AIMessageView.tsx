@@ -1,7 +1,8 @@
+import { InlineLoader } from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Sparkles } from "lucide-react";
 
 interface AIMessageViewProps {
   text: string;
@@ -36,11 +37,7 @@ export const AIMessageView = ({
         disabled={isLoading}
         className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
       >
-        {isLoading ? (
-          <Loader2 className="w-4 h-4 animate-spin mr-2" />
-        ) : (
-          <Sparkles className="w-4 h-4 mr-2" />
-        )}
+        {isLoading ? <InlineLoader /> : <Sparkles className="w-4 h-4 mr-2" />}
         Regenerate AI Data
       </Button>
     </div>

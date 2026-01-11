@@ -263,67 +263,14 @@ const Extraction = () => {
     },
     onError: (error) => {
       const err = error as AxiosError<{ furnish_type: string[] }>;
-      console.log(err);
-
+      console.error("Inventory save error:", err);
       toast({
         title: "Error Saving Inventory",
-        description: err.response?.data?.furnish_type[0],
+        description:
+          err.response?.data?.furnish_type?.[0] || "Failed to save inventory",
+        variant: "destructive",
       });
     },
-
-    //   if (isAxiosError(error) && error.response?.data) {
-    //     const errorData = error.response.data;
-
-    //     if (errorData.detail) {
-    //       toast({
-    //         title: "Operation Failed",
-    //         description: errorData.detail,
-    //         variant: "destructive",
-    //       });
-    //       return;
-    //     }
-
-    //     if (Array.isArray(errorData.non_field_errors)) {
-    //       toast({
-    //         title: "Error",
-    //         description: errorData.non_field_errors[0],
-    //         variant: "destructive",
-    //       });
-    //       return;
-    //     }
-    //     const apiErrors = errorData as Record<string, string[]>;
-    //     let firstErrorMessage = "";
-
-    //     Object.keys(apiErrors).forEach((key, index) => {
-    //       const msg = apiErrors[key][0];
-
-    //       if (index === 0) firstErrorMessage = `${key}: ${msg}`;
-
-    //       if (formType === "inventory") {
-    //         inventoryForm.setError(key as any, {
-    //           type: "server",
-    //           message: msg,
-    //         });
-    //       } else {
-    //         requestForm.setError(key as any, { type: "server", message: msg });
-    //       }
-    //     });
-
-    //     toast({
-    //       title: "Validation Error",
-    //       description: firstErrorMessage
-    //         ? `${firstErrorMessage} (and others)`
-    //         : "Please check the form fields.",
-    //       variant: "destructive",
-    //     });
-    //   } else {
-    //     toast({
-    //       title: "Network Error",
-    //       description: "Something went wrong. Please check your connection.",
-    //       variant: "destructive",
-    //     });
-    //   }
-    // },
   });
 
   const requestMutation = useMutation({

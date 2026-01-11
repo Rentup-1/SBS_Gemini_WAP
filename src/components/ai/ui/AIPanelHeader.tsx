@@ -1,15 +1,12 @@
-import { sendWhatsAppReply } from "@/api/messages";
+import { InlineLoader } from "@/components/common/LoadingSpinner";
 import { WhatsAppReplyDialog } from "@/components/dialogs/WhatsAppReplyDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
 import type { Message, UserType } from "@/types";
-import { useMutation } from "@tanstack/react-query";
 import {
   ChevronLeft,
   ChevronRight,
   Globe,
-  Loader2,
   MessageCircle,
   Phone,
   TagIcon,
@@ -86,7 +83,7 @@ export const AIPanelHeader = ({
         <div>
           {isLoadingUser ? (
             <Badge variant="outline" className="text-slate-500 bg-white gap-1">
-              <Loader2 className="w-3 h-3 animate-spin" /> Checking...
+              <InlineLoader /> Checking...
             </Badge>
           ) : existingUser ? (
             <Badge className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200 gap-1.5 px-3 py-1">
