@@ -15,8 +15,12 @@ export const clearTokens = () => {
 };
 
 // Core API instance (api.sbs-brokerz.com)
+// Use relative path for Vite proxy in development, direct URL in production
 export const coreApi = axios.create({
-  baseURL: "https://api.sbs-brokerz.com/api/v1",
+  baseURL:
+    import.meta.env.MODE === "development"
+      ? "/api/v1"
+      : "https://api.sbs-brokerz.com/api/v1",
   headers: {
     "Content-Type": "application/json",
   },
@@ -31,7 +35,7 @@ coreApi.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Response interceptor for token refresh
@@ -46,12 +50,14 @@ coreApi.interceptors.response.use(
 
       if (refreshToken) {
         try {
-          const response = await axios.post(
-            "https://api.sbs-brokerz.com/api/v1/auth/refresh/",
-            {
-              refresh: refreshToken,
-            }
-          );
+          const refreshUrl =
+            import.meta.env.MODE === "development"
+              ? "/api/v1/auth/refresh/"
+              : "https://api.sbs-brokerz.com/api/v1/auth/refresh/";
+
+          const response = await axios.post(refreshUrl, {
+            refresh: refreshToken,
+          });
 
           const { access, refresh } = response.data;
 
@@ -72,5 +78,5 @@ coreApi.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
