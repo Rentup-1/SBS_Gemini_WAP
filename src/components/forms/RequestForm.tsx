@@ -32,20 +32,17 @@ const RequestForm = ({
 }: RequestFormProps) => {
   const { register, control, watch, setValue } = useFormContext();
 
-  // Watch type and transaction_type for conditional field visibility
+  // Watch type for conditional field visibility
   const type = watch("type");
-  const transactionType = watch("transaction_type");
 
   // Determine which sections to show
   const isRent = type === "rent";
   const isBuy = type === "buy";
-  const isInstallment = transactionType === "installment";
 
-  // rent: show rent_duration, hide installment
-  // buy + cash: hide both
-  // buy + installment: hide rent_duration, show installment
+  // rent: show rent_duration + rental terms
+  // buy: show required installment + rental terms (different colors)
   const showRentDuration = isRent;
-  const showInstallment = isBuy && isInstallment;
+  const showRequiredInstallment = isBuy;
 
   // Custom Logic for Multi-select Property Types
   const selectedPropTypes = watch("property_type_ids") || [];
@@ -62,21 +59,21 @@ const RequestForm = ({
   const removeExactLocation = (index: number) => {
     setValue(
       "exact_locations_text",
-      exactNames.filter((_, i: number) => i !== index)
+      exactNames.filter((_, i: number) => i !== index),
     );
     setValue(
       "exact_location_ids",
-      exactIds.filter((_, i: number) => i !== index)
+      exactIds.filter((_, i: number) => i !== index),
     );
   };
   const removeSuggestedLocation = (index: number) => {
     setValue(
       "suggested_locations_text",
-      suggestedNames.filter((_, i: number) => i !== index)
+      suggestedNames.filter((_, i: number) => i !== index),
     );
     setValue(
       "suggested_location_ids",
-      suggestedIds.filter((_, i: number) => i !== index)
+      suggestedIds.filter((_, i: number) => i !== index),
     );
   };
   // Toggle Property Type
@@ -85,7 +82,7 @@ const RequestForm = ({
     if (current.includes(id))
       setValue(
         "property_type_ids",
-        current.filter((x: number) => x !== id)
+        current.filter((x: number) => x !== id),
       );
     else setValue("property_type_ids", [...current, id]);
   };
@@ -340,62 +337,65 @@ const RequestForm = ({
           </div>
         )}
 
-        {/* Installment Section - Only for buy + installment */}
-        {showInstallment && (
+        {/* Required Installment Payment Plan - buy */}
+        {showRequiredInstallment && (
           <div className="space-y-2">
             <h5 className="text-xs font-medium text-slate-600">
-              Installment Details
+              Required Installment Payment Plan
             </h5>
-            <div className="grid grid-cols-4 gap-4 bg-amber-50 p-3 rounded-md border border-amber-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-purple-50 p-3 rounded-md border border-purple-200">
               <div className="space-y-1.5">
-                <Label className="text-xs">Period Type</Label>
-                <Controller
-                  name="installment_period_type"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value || ""}
-                    >
-                      <SelectTrigger className="h-8">
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                        <SelectItem value="quarterly">Quarterly</SelectItem>
-                        <SelectItem value="yearly">Yearly</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
+                <Label className="text-xs">Installment Plan (EN)</Label>
+                <Textarea
+                  {...register("required_installment_payment_plan_en")}
+                  placeholder="Required installment payment plan in English..."
+                  className="h-20 text-sm"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Total Periods</Label>
-                <Input
-                  {...register("total_installment_period")}
-                  className="h-8"
-                  placeholder="e.g. 5"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Amount</Label>
-                <Input
-                  {...register("installment_amount")}
-                  className="h-8"
-                  placeholder="Amount"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Payment Plan</Label>
-                <Input
-                  {...register("installment_payment_plan")}
-                  className="h-8"
-                  placeholder="Plan"
+                <Label className="text-xs">Installment Plan (AR)</Label>
+                <Textarea
+                  {...register("required_installment_payment_plan_ar")}
+                  placeholder="خطة التقسيط المطلوبة بالعربية..."
+                  className="h-20 text-sm"
+                  dir="rtl"
                 />
               </div>
             </div>
           </div>
         )}
+
+        {/* Required Rental Terms Payment - always shown, different color */}
+        <div className="space-y-2">
+          <h5 className="text-xs font-medium text-slate-600">
+            Required Rental Terms Payment
+          </h5>
+          <div
+            className={`grid grid-cols-1 md:grid-cols-2 gap-4 p-3 rounded-md border ${
+              isBuy
+                ? "bg-teal-50 border-teal-200"
+                : "bg-emerald-50 border-emerald-200"
+            }`}
+          >
+            <div className="space-y-1.5">
+              <Label className="text-xs">Rental Terms (EN)</Label>
+              <Textarea
+                {...register("required_rental_terms_payment_en")}
+                placeholder="Required rental terms payment in English..."
+                className="h-20 text-sm"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Rental Terms (AR)</Label>
+              <Textarea
+                {...register("required_rental_terms_payment_ar")}
+                placeholder="شروط الإيجار المطلوبة بالعربية..."
+                className="h-20 text-sm"
+                dir="rtl"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* 3. Specs & Location */}
@@ -491,7 +491,7 @@ const RequestForm = ({
                   setValue(
                     "suggested_location_ids",
                     [...suggestedIds, loc.id],
-                    { shouldDirty: true }
+                    { shouldDirty: true },
                   );
                   setValue("suggested_locations_text", [
                     ...suggestedNames,

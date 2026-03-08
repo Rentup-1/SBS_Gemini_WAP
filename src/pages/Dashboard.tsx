@@ -82,6 +82,15 @@ const Dashboard = () => {
     status: "",
   });
 
+  // Status toggle filter
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const STATUS_OPTIONS = [
+    "all",
+    "Admin_message",
+    "Auto_listed",
+    "Manual_listed",
+  ] as const;
+
   const {
     data: messages = [],
     isLoading,
@@ -148,13 +157,17 @@ const Dashboard = () => {
         (msg.listing_status || "")
           .toLowerCase()
           .includes(filters.status.toLowerCase());
+      const matchStatusToggle =
+        statusFilter === "all" ||
+        (msg.listing_status || "").toLowerCase() === statusFilter.toLowerCase();
       return (
         matchId &&
         matchUsername &&
         matchPhone &&
         matchMessage &&
         matchType &&
-        matchStatus
+        matchStatus &&
+        matchStatusToggle
       );
     });
 
@@ -169,13 +182,13 @@ const Dashboard = () => {
     });
 
     return result;
-  }, [messages, filters, sortConfig]);
+  }, [messages, filters, sortConfig, statusFilter]);
 
   // 3. Pagination Logic
   const totalPages = Math.ceil(processedData.length / ITEMS_PER_PAGE);
   const paginatedMessages = processedData.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   useMemo(() => {
@@ -267,6 +280,22 @@ const Dashboard = () => {
               <Badge variant="secondary" className="ml-2">
                 {processedData.length} Total
               </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              {STATUS_OPTIONS.map((status) => (
+                <Button
+                  key={status}
+                  size="sm"
+                  variant={statusFilter === status ? "default" : "outline"}
+                  onClick={() => {
+                    setStatusFilter(status);
+                    setCurrentPage(1);
+                  }}
+                  className="capitalize text-xs"
+                >
+                  {status === "all" ? "All" : status.replace("_", " ")}
+                </Button>
+              ))}
             </div>
             <Button
               variant="outline"
@@ -512,12 +541,12 @@ const Dashboard = () => {
                     Showing{" "}
                     {Math.min(
                       (currentPage - 1) * ITEMS_PER_PAGE + 1,
-                      processedData.length
+                      processedData.length,
                     )}{" "}
                     to{" "}
                     {Math.min(
                       currentPage * ITEMS_PER_PAGE,
-                      processedData.length
+                      processedData.length,
                     )}{" "}
                     of {processedData.length} entries
                   </div>

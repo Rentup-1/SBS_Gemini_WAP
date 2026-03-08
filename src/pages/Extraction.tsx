@@ -34,7 +34,7 @@ const Extraction = () => {
   const message = state?.fullMessage;
   const AllMessages = state?.contextList;
   const [currentMessage, setCurrentMessage] = useState<Message | null>(
-    message || null
+    message || null,
   );
   // --- Fetch Existing User Logic ---
   const { data: existingUser, isLoading: isUserLoading } = useQuery({
@@ -49,7 +49,7 @@ const Extraction = () => {
 
     // know the index of the current message
     const currentIndex = AllMessages.findIndex(
-      (m) => m.id === currentMessage.id
+      (m) => m.id === currentMessage.id,
     );
     if (currentIndex === -1) return;
 
@@ -74,7 +74,7 @@ const Extraction = () => {
       // scroll to the top of the page
       window.scrollTo(0, 0);
       setFormType(
-        nextMessage.type?.toLowerCase() === "request" ? "request" : "inventory"
+        nextMessage.type?.toLowerCase() === "request" ? "request" : "inventory",
       );
     }
   };
@@ -87,7 +87,7 @@ const Extraction = () => {
   const hasPrev = currentIndex > 0;
 
   const [formType, setFormType] = useState<"inventory" | "request">(
-    message?.type?.toLowerCase() === "request" ? "request" : "inventory"
+    message?.type?.toLowerCase() === "request" ? "request" : "inventory",
   );
 
   const { data: tags = [] } = useQuery<Tag[]>({
@@ -131,10 +131,11 @@ const Extraction = () => {
       rent_duration_type: "monthly",
       rent_duration_start_date: new Date().toISOString().split("T")[0],
       rent_duration_end_date: new Date().toISOString().split("T")[0],
-      installment_period_type: "monthly",
-      installment_amount: "0",
-      total_installment_period: "0",
-      installment_payment_plan: "",
+      comprehensive_payment_structure_en: "",
+      comprehensive_payment_structure_ar: "",
+      rental_terms_and_financial_commitments_en: "",
+      rental_terms_and_financial_commitments_ar: "",
+      delivery_year: "",
       listing_code: "",
       transaction_type: "monthly",
       fuzzy_status: "DONE",
@@ -170,10 +171,10 @@ const Extraction = () => {
       rent_duration_type: "monthly",
       rent_duration_start_date: new Date().toISOString().split("T")[0],
       rent_duration_end_date: new Date().toISOString().split("T")[0],
-      installment_period_type: "monthly",
-      installment_amount: "0",
-      total_installment_period: "0",
-      installment_payment_plan: "",
+      required_installment_payment_plan_en: "",
+      required_installment_payment_plan_ar: "",
+      required_rental_terms_payment_en: "",
+      required_rental_terms_payment_ar: "",
     },
   });
 
@@ -210,10 +211,11 @@ const Extraction = () => {
       rent_duration_type: "monthly",
       rent_duration_start_date: today,
       rent_duration_end_date: today,
-      installment_period_type: "monthly",
-      installment_amount: "0",
-      total_installment_period: "0",
-      installment_payment_plan: "",
+      comprehensive_payment_structure_en: "",
+      comprehensive_payment_structure_ar: "",
+      rental_terms_and_financial_commitments_en: "",
+      rental_terms_and_financial_commitments_ar: "",
+      delivery_year: "",
       listing_code: "",
       transaction_type: "monthly",
       fuzzy_status: "DONE",
@@ -247,10 +249,10 @@ const Extraction = () => {
       rent_duration_type: "monthly",
       rent_duration_start_date: today,
       rent_duration_end_date: today,
-      installment_period_type: "monthly",
-      installment_amount: "0",
-      total_installment_period: "0",
-      installment_payment_plan: "",
+      required_installment_payment_plan_en: "",
+      required_installment_payment_plan_ar: "",
+      required_rental_terms_payment_en: "",
+      required_rental_terms_payment_ar: "",
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentMessage?.id]);
@@ -293,10 +295,9 @@ const Extraction = () => {
   const handleSaveInventory = (data: InventoryPayload) => {
     if (!currentMessage) return;
 
-    // Determine which fields to null out based on type and transaction_type
+    // Determine which fields to null out based on type
     const isRent = data.type === "for_rent";
     const isSale = data.type === "for_sale";
-    const isInstallment = data.transaction_type === "installment";
 
     // Build payload with nulled fields based on business logic
     const payload: InventoryPayload = {
@@ -310,14 +311,20 @@ const Extraction = () => {
       rent_duration_type: isRent ? data.rent_duration_type : null,
       rent_duration_start_date: isRent ? data.rent_duration_start_date : null,
       rent_duration_end_date: isRent ? data.rent_duration_end_date : null,
-      installment_period_type:
-        isSale && isInstallment ? data.installment_period_type : null,
-      installment_amount:
-        isSale && isInstallment ? data.installment_amount : null,
-      total_installment_period:
-        isSale && isInstallment ? data.total_installment_period : null,
-      installment_payment_plan:
-        isSale && isInstallment ? data.installment_payment_plan : null,
+      // Comprehensive payment structure
+      comprehensive_payment_structure_en: isSale
+        ? data.comprehensive_payment_structure_en
+        : null,
+      comprehensive_payment_structure_ar: isSale
+        ? data.comprehensive_payment_structure_ar
+        : null,
+      // Rental terms
+      rental_terms_and_financial_commitments_en:
+        data.rental_terms_and_financial_commitments_en || null,
+      rental_terms_and_financial_commitments_ar:
+        data.rental_terms_and_financial_commitments_ar || null,
+      // Delivery year
+      delivery_year: isSale ? data.delivery_year : null,
     };
 
     inventoryMutation.mutate(payload);
@@ -326,10 +333,9 @@ const Extraction = () => {
   const handleSaveRequest = (data: RequestPayload) => {
     if (!currentMessage) return;
 
-    // Determine which fields to null out based on type and transaction_type
+    // Determine which fields to null out based on type
     const isRent = data.type === "rent";
     const isBuy = data.type === "buy";
-    const isInstallment = data.transaction_type === "installment";
 
     // Build payload with nulled fields based on business logic
     const payload: RequestPayload = {
@@ -347,14 +353,18 @@ const Extraction = () => {
       rent_duration_type: isRent ? data.rent_duration_type : null,
       rent_duration_start_date: isRent ? data.rent_duration_start_date : null,
       rent_duration_end_date: isRent ? data.rent_duration_end_date : null,
-      installment_period_type:
-        isBuy && isInstallment ? data.installment_period_type : null,
-      installment_amount:
-        isBuy && isInstallment ? data.installment_amount : null,
-      total_installment_period:
-        isBuy && isInstallment ? data.total_installment_period : null,
-      installment_payment_plan:
-        isBuy && isInstallment ? data.installment_payment_plan : null,
+      // Required payment plans
+      required_installment_payment_plan_en: isBuy
+        ? data.required_installment_payment_plan_en
+        : null,
+      required_installment_payment_plan_ar: isBuy
+        ? data.required_installment_payment_plan_ar
+        : null,
+      // Required rental terms
+      required_rental_terms_payment_en:
+        data.required_rental_terms_payment_en || null,
+      required_rental_terms_payment_ar:
+        data.required_rental_terms_payment_ar || null,
     };
 
     requestMutation.mutate(payload);
@@ -465,7 +475,7 @@ const Extraction = () => {
                   formType={formType}
                   onToggleType={() =>
                     setFormType((prev) =>
-                      prev === "inventory" ? "request" : "inventory"
+                      prev === "inventory" ? "request" : "inventory",
                     )
                   }
                   form={activeForm}

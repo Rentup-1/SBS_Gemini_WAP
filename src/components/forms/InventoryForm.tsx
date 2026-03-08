@@ -32,20 +32,17 @@ const InventoryForm = ({
   const inventoryOptions = watch("inventory_options") || {};
   const optionsKeys = Object.keys(inventoryOptions);
 
-  // Watch type and transaction_type for conditional field visibility
+  // Watch type for conditional field visibility
   const type = watch("type");
-  const transactionType = watch("transaction_type");
 
   // Determine which sections to show
   const isRent = type === "for_rent";
   const isSale = type === "for_sale";
-  const isInstallment = transactionType === "installment";
 
-  // for_rent: show rent_duration, hide installment
-  // for_sale + cash: hide both
-  // for_sale + installment: hide rent_duration, show installment
+  // for_rent: show rent_duration + rental terms
+  // for_sale: show comprehensive payment + rental terms (different colors)
   const showRentDuration = isRent;
-  const showInstallment = isSale && isInstallment;
+  const showComprehensivePayment = isSale;
 
   return (
     <div className="space-y-6 p-1">
@@ -279,58 +276,75 @@ const InventoryForm = ({
           </div>
         )}
 
-        {/* Installment Section - Only for for_sale + installment */}
-        {showInstallment && (
+        {/* Comprehensive Payment Structure - for_sale */}
+        {showComprehensivePayment && (
           <div className="space-y-2">
             <h5 className="text-xs font-medium text-slate-600">
-              Installment Details
+              Comprehensive Payment Structure
             </h5>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-amber-50 p-3 rounded-md border border-amber-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-purple-50 p-3 rounded-md border border-purple-200">
               <div className="space-y-1.5">
-                <Label className="text-xs">Period Type</Label>
-                <Controller
-                  name="installment_period_type"
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className="h-8">
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                        <SelectItem value="quarterly">Quarterly</SelectItem>
-                        <SelectItem value="yearly">Yearly</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
+                <Label className="text-xs">Payment Structure (EN)</Label>
+                <Textarea
+                  {...register("comprehensive_payment_structure_en")}
+                  placeholder="Comprehensive payment structure in English..."
+                  className="h-20 text-sm"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Total Periods</Label>
-                <Input
-                  {...register("total_installment_period")}
-                  placeholder="e.g. 5"
-                  className="h-8"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Amount</Label>
-                <Input
-                  {...register("installment_amount")}
-                  placeholder="Amount"
-                  className="h-8"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Payment Plan</Label>
-                <Input
-                  {...register("installment_payment_plan")}
-                  placeholder="Payment plan"
-                  className="h-8"
+                <Label className="text-xs">Payment Structure (AR)</Label>
+                <Textarea
+                  {...register("comprehensive_payment_structure_ar")}
+                  placeholder="هيكل الدفع الشامل بالعربية..."
+                  className="h-20 text-sm"
+                  dir="rtl"
                 />
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Rental Terms - always shown, different color based on type */}
+        <div className="space-y-2">
+          <h5 className="text-xs font-medium text-slate-600">
+            Rental Terms & Financial Commitments
+          </h5>
+          <div
+            className={`grid grid-cols-1 md:grid-cols-2 gap-4 p-3 rounded-md border ${
+              isSale
+                ? "bg-teal-50 border-teal-200"
+                : "bg-emerald-50 border-emerald-200"
+            }`}
+          >
+            <div className="space-y-1.5">
+              <Label className="text-xs">Rental Terms (EN)</Label>
+              <Textarea
+                {...register("rental_terms_and_financial_commitments_en")}
+                placeholder="Rental terms and financial commitments in English..."
+                className="h-20 text-sm"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Rental Terms (AR)</Label>
+              <Textarea
+                {...register("rental_terms_and_financial_commitments_ar")}
+                placeholder="شروط الإيجار والالتزامات المالية بالعربية..."
+                className="h-20 text-sm"
+                dir="rtl"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Delivery Year - for_sale */}
+        {isSale && (
+          <div className="space-y-1.5">
+            <Label className="text-xs">Delivery Year</Label>
+            <Input
+              {...register("delivery_year")}
+              placeholder="e.g. 2027"
+              className="h-8 w-48"
+            />
           </div>
         )}
       </div>

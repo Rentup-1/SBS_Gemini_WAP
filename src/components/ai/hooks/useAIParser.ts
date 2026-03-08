@@ -51,7 +51,7 @@ export const useAIParser = ({
     // 3. Tags
     if (data.tag) {
       const foundTag = tags.find(
-        (t) => t.name.toLowerCase() === data.tag?.toLowerCase()
+        (t) => t.name.toLowerCase() === data.tag?.toLowerCase(),
       );
       if (foundTag) form.setValue("tag", foundTag.id);
     }
@@ -69,14 +69,14 @@ export const useAIParser = ({
       const ids: number[] = [];
       typeKeys.forEach((k) => {
         const pt = propertyTypes.find((p) =>
-          p.name.toLowerCase().includes(k.toLowerCase())
+          p.name.toLowerCase().includes(k.toLowerCase()),
         );
         if (pt) ids.push(pt.id);
       });
       if (ids.length > 0) form.setValue("property_type_ids", ids);
     } else if (formType === "inventory" && data.property_type) {
       const pt = propertyTypes.find((p) =>
-        p.name.toLowerCase().includes(data.property_type!.toLowerCase())
+        p.name.toLowerCase().includes(data.property_type!.toLowerCase()),
       );
       if (pt) form.setValue("property_type", pt.id);
     }
@@ -85,7 +85,7 @@ export const useAIParser = ({
     const fType = data.furnish_type || data.furnish_types;
     if (fType) {
       const ft = furnishedTypes.find((f) =>
-        f.name.toLowerCase().includes(fType.toLowerCase())
+        f.name.toLowerCase().includes(fType.toLowerCase()),
       );
       if (ft) form.setValue("furnish_type", ft.id);
     }
@@ -101,7 +101,7 @@ export const useAIParser = ({
     if (data.rent_duration_type) {
       form.setValue(
         "rent_duration_type",
-        data.rent_duration_type.toLowerCase()
+        data.rent_duration_type.toLowerCase(),
       );
     }
     if (data.rent_duration_start_date) {
@@ -111,21 +111,55 @@ export const useAIParser = ({
       form.setValue("rent_duration_end_date", data.rent_duration_end_date);
     }
 
-    // Installment fields (new naming)
-    if (data.installment_period_type)
-      form.setValue(
-        "installment_period_type",
-        data.installment_period_type.toLowerCase()
-      );
-    if (data.installment_amount)
-      form.setValue("installment_amount", String(data.installment_amount));
-    if (data.total_installment_period)
-      form.setValue(
-        "total_installment_period",
-        String(data.total_installment_period)
-      );
-    if (data.installment_payment_plan)
-      form.setValue("installment_payment_plan", data.installment_payment_plan);
+    // Comprehensive payment structure (Inventory)
+    if (formType === "inventory") {
+      if (data.comprehensive_payment_structure_en !== undefined)
+        form.setValue(
+          "comprehensive_payment_structure_en",
+          data.comprehensive_payment_structure_en || "",
+        );
+      if (data.comprehensive_payment_structure_ar !== undefined)
+        form.setValue(
+          "comprehensive_payment_structure_ar",
+          data.comprehensive_payment_structure_ar || "",
+        );
+      if (data.rental_terms_and_financial_commitments_en !== undefined)
+        form.setValue(
+          "rental_terms_and_financial_commitments_en",
+          data.rental_terms_and_financial_commitments_en || "",
+        );
+      if (data.rental_terms_and_financial_commitments_ar !== undefined)
+        form.setValue(
+          "rental_terms_and_financial_commitments_ar",
+          data.rental_terms_and_financial_commitments_ar || "",
+        );
+      if (data.delivery_year !== undefined)
+        form.setValue("delivery_year", data.delivery_year || "");
+    }
+
+    // Required payment plans (Request)
+    if (formType === "request") {
+      if (data.required_installment_payment_plan_en !== undefined)
+        form.setValue(
+          "required_installment_payment_plan_en",
+          data.required_installment_payment_plan_en || "",
+        );
+      if (data.required_installment_payment_plan_ar !== undefined)
+        form.setValue(
+          "required_installment_payment_plan_ar",
+          data.required_installment_payment_plan_ar || "",
+        );
+      if (data.required_rental_terms_payment_en !== undefined)
+        form.setValue(
+          "required_rental_terms_payment_en",
+          data.required_rental_terms_payment_en || "",
+        );
+      if (data.required_rental_terms_payment_ar !== undefined)
+        form.setValue(
+          "required_rental_terms_payment_ar",
+          data.required_rental_terms_payment_ar || "",
+        );
+    }
 
     // 7. Deal Type & Meta
     if (data.deal_deal_type) {
@@ -145,8 +179,8 @@ export const useAIParser = ({
             ? "for_sale"
             : "buy"
           : formType === "inventory"
-          ? "for_rent"
-          : "rent";
+            ? "for_rent"
+            : "rent";
       form.setValue("type", val);
     }
 
@@ -158,27 +192,33 @@ export const useAIParser = ({
     // 10. Options Parsing
     // Helper function to convert options (Array/String) to UI Object format
     const normalizeOptions = (
-      input: string | string[] | undefined
+      input: string | string[] | undefined,
     ): Record<string, boolean> => {
       if (!input) return {};
 
       // Case 1: If it's an Array (e.g. ["air conditioning", "tv"])
       if (Array.isArray(input)) {
-        return input.reduce((acc, curr) => {
-          if (typeof curr === "string") {
-            acc[curr.trim()] = true;
-          }
-          return acc;
-        }, {} as Record<string, boolean>);
+        return input.reduce(
+          (acc, curr) => {
+            if (typeof curr === "string") {
+              acc[curr.trim()] = true;
+            }
+            return acc;
+          },
+          {} as Record<string, boolean>,
+        );
       }
 
       // Case 2: If it's a comma-separated String (e.g. "air conditioning, tv")
       if (typeof input === "string") {
-        return input.split(",").reduce((acc, curr) => {
-          const key = curr.trim();
-          if (key) acc[key] = true;
-          return acc;
-        }, {} as Record<string, boolean>);
+        return input.split(",").reduce(
+          (acc, curr) => {
+            const key = curr.trim();
+            if (key) acc[key] = true;
+            return acc;
+          },
+          {} as Record<string, boolean>,
+        );
       }
 
       return {};
@@ -190,7 +230,7 @@ export const useAIParser = ({
     ) {
       form.setValue(
         "inventory_options",
-        normalizeOptions(data.inventory_options)
+        normalizeOptions(data.inventory_options),
       );
     } else if (formType === "request" && data.request_options) {
       form.setValue("request_options", normalizeOptions(data.request_options));
@@ -215,7 +255,7 @@ export const useAIParser = ({
       if (data.locations_text) {
         form.setValue(
           "locations_text",
-          normalizeToTextArray(data.locations_text)
+          normalizeToTextArray(data.locations_text),
         );
       }
     } else {
@@ -223,7 +263,7 @@ export const useAIParser = ({
       if (data.exact_locations_text) {
         form.setValue(
           "exact_locations_text",
-          normalizeToTextArray(data.exact_locations_text)
+          normalizeToTextArray(data.exact_locations_text),
         );
       } else {
         form.setValue("exact_locations_text", []);
@@ -232,7 +272,7 @@ export const useAIParser = ({
       if (data.suggested_locations_text) {
         form.setValue(
           "suggested_locations_text",
-          normalizeToTextArray(data.suggested_locations_text)
+          normalizeToTextArray(data.suggested_locations_text),
         );
       } else {
         form.setValue("suggested_locations_text", []);

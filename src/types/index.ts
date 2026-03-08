@@ -130,11 +130,18 @@ export interface AIProcessResponse {
   rent_duration_start_date?: string;
   rent_duration_end_date?: string;
 
-  // Installment fields
-  installment_period_type?: string;
-  installment_amount?: string;
-  total_installment_period?: string;
-  installment_payment_plan?: string;
+  // Comprehensive payment structure (inventory)
+  comprehensive_payment_structure_en?: string;
+  comprehensive_payment_structure_ar?: string;
+  rental_terms_and_financial_commitments_en?: string;
+  rental_terms_and_financial_commitments_ar?: string;
+  delivery_year?: string;
+
+  // Required payment plans (request)
+  required_installment_payment_plan_en?: string;
+  required_installment_payment_plan_ar?: string;
+  required_rental_terms_payment_en?: string;
+  required_rental_terms_payment_ar?: string;
 
   inventory_options?: string;
   request_options?: string;
@@ -170,12 +177,6 @@ export interface AIInventoryResponse {
   rent_duration_type?: string;
   rent_duration_start_date?: string;
   rent_duration_end_date?: string;
-
-  // Installment fields
-  installment_period_type?: string;
-  installment_amount?: string;
-  total_installment_period?: string;
-  installment_payment_plan?: string;
 
   listing_code?: string;
   agent_assigned?: number;
@@ -217,12 +218,6 @@ export interface AIRequestResponse {
   rent_duration_type?: string;
   rent_duration_start_date?: string;
   rent_duration_end_date?: string;
-
-  // Installment fields
-  installment_period_type?: string;
-  installment_amount?: string;
-  total_installment_period?: string;
-  installment_payment_plan?: string;
 
   listing_code?: string;
   agent_assigned?: number;
@@ -280,11 +275,16 @@ export interface InventoryPayload {
   rent_duration_start_date: string; // YYYY-MM-DD
   rent_duration_end_date: string; // YYYY-MM-DD
 
-  // Installment (new field names)
-  installment_period_type: string;
-  installment_amount: string;
-  total_installment_period: string;
-  installment_payment_plan: string;
+  // Comprehensive payment structure (for_sale)
+  comprehensive_payment_structure_en: string;
+  comprehensive_payment_structure_ar: string;
+
+  // Rental terms (for_rent)
+  rental_terms_and_financial_commitments_en: string;
+  rental_terms_and_financial_commitments_ar: string;
+
+  // Delivery
+  delivery_year: string;
 
   // Meta
   whatsapp_msg: string;
@@ -337,11 +337,13 @@ export interface RequestPayload {
   rent_duration_start_date: string;
   rent_duration_end_date: string;
 
-  // Installment (new field names)
-  installment_period_type: string;
-  installment_amount: string;
-  total_installment_period: string;
-  installment_payment_plan: string;
+  // Required payment plans (buy)
+  required_installment_payment_plan_en: string;
+  required_installment_payment_plan_ar: string;
+
+  // Required rental terms (rent)
+  required_rental_terms_payment_en: string;
+  required_rental_terms_payment_ar: string;
 
   // Meta
   whatsapp_msg: string;
